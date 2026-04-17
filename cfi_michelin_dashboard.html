@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="en">
+<!--
+  CFI — Carbon Fleet Intelligence · Michelin Internal Dashboard
+  INNOVATEChina 2026 · CONQUERORS · University of Strathclyde MBA
+  Financial data: Pius Owusu-Ansah v150426 | Methodology: CFI CCER-Ready v1.2
+  6 pages: Overview · Revenue & P&L · Operators · Retreading · Carbon Methodology · ESG Star
+-->
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>CFI — Michelin Internal Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=IBM+Plex+Mono:wght@400;500&family=Playfair+Display:ital,wght@0,600;1,400&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --red:#C8102E; --red-d:rgba(200,16,46,.12); --red-b:rgba(200,16,46,.25);
+  --gold:#D4A017; --gold-d:rgba(212,160,23,.12);
+  --blue:#3B82F6; --blue-d:rgba(59,130,246,.12); --blue-b:rgba(59,130,246,.25);
+  --green:#22C55E; --green-d:rgba(34,197,94,.12); --green-b:rgba(34,197,94,.25);
+  --bronze:#CD7F32; --bronze-d:rgba(205,127,50,.12); --bronze-b:rgba(205,127,50,.25);
+  --bg:#0D0F12; --bg2:#141720; --bg3:#1C2030; --bg4:#242840;
+  --bdr:rgba(255,255,255,.07); --bdr2:rgba(255,255,255,.13);
+  --t1:#ECE9E4; --t2:#8A8D99; --t3:#525566;
+  --font:'IBM Plex Sans',sans-serif; --mono:'IBM Plex Mono',monospace; --display:'Playfair Display',serif;
+  --sw:220px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{height:100%;}
+body{font-family:var(--font);background:var(--bg);color:var(--t1);height:100%;display:grid;grid-template-columns:var(--sw) 1fr;grid-template-rows:100%;overflow:hidden;}
+
+/* SIDEBAR */
+.sidebar{background:var(--bg2);border-right:1px solid var(--bdr2);display:flex;flex-direction:column;height:100vh;overflow-y:auto;}
+.sb-brand{padding:18px 16px 14px;border-bottom:1px solid var(--bdr);}
+.sb-badge{display:inline-flex;align-items:center;gap:5px;font-size:9px;font-weight:600;letter-spacing:1.2px;color:var(--red);background:var(--red-d);border:1px solid var(--red-b);border-radius:3px;padding:2px 7px;margin-bottom:8px;}
+.sb-dot{width:5px;height:5px;border-radius:50%;background:var(--red);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+.sb-title{font-family:var(--display);font-size:18px;font-weight:600;line-height:1.1;margin-bottom:3px;}
+.sb-sub{font-size:10px;color:var(--t2);line-height:1.4;}
+.sb-sec{font-size:9px;font-weight:600;letter-spacing:1.2px;color:var(--t3);padding:12px 16px 5px;text-transform:uppercase;}
+.nav-item{display:flex;align-items:center;gap:9px;padding:9px 16px;cursor:pointer;border-left:3px solid transparent;font-size:12px;font-weight:400;color:var(--t2);transition:all .15s;user-select:none;}
+.nav-item:hover{background:var(--bg3);color:var(--t1);}
+.nav-item.active{border-left-color:var(--red);background:var(--red-d);color:var(--t1);font-weight:500;}
+.nav-ico{font-size:15px;width:18px;flex-shrink:0;}
+.sb-footer{margin-top:auto;padding:14px 16px;border-top:1px solid var(--bdr);font-size:10px;color:var(--t3);line-height:1.5;}
+
+/* MAIN AREA */
+.main{display:flex;flex-direction:column;height:100vh;overflow:hidden;}
+.topbar{background:var(--bg2);border-bottom:1px solid var(--bdr2);padding:10px 22px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.tb-left{display:flex;flex-direction:column;gap:2px;}
+.tb-title{font-size:13px;font-weight:500;color:var(--t1);}
+.tb-meta{font-size:10px;color:var(--t2);}
+.tb-right{display:flex;align-items:center;gap:8px;}
+.pill{font-size:9px;font-weight:600;letter-spacing:.8px;padding:3px 8px;border-radius:4px;border:1px solid;}
+.pill-green{background:var(--green-d);color:var(--green);border-color:var(--green-b);}
+.pill-blue{background:var(--blue-d);color:var(--blue);border-color:var(--blue-b);}
+.content{flex:1;overflow-y:auto;padding:0;}
+
+/* PAGES */
+.page{display:none;flex-direction:column;gap:20px;padding:24px;}
+.page.active{display:flex;}
+.ph{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+.ph-title{font-family:var(--display);font-size:24px;font-weight:600;line-height:1.2;}
+.ph-title em{font-style:italic;color:var(--red);}
+.ph-sub{font-size:11px;color:var(--t2);margin-top:3px;}
+.ph-actions{display:flex;gap:8px;flex-wrap:wrap;}
+
+/* BUTTONS */
+.btn{padding:6px 13px;border-radius:5px;font-size:11px;font-weight:500;cursor:pointer;font-family:var(--font);transition:.15s;border:1px solid var(--bdr2);background:var(--bg3);color:var(--t1);}
+.btn:hover{border-color:var(--red);color:var(--red);}
+.btn-primary{background:var(--red);color:#fff;border-color:var(--red);}
+.btn-primary:hover{background:#a50f25;color:#fff;}
+
+/* GRIDS */
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.g21{display:grid;grid-template-columns:2fr 1fr;gap:14px;}
+
+/* KPI CARD */
+.kpi{background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:14px;position:relative;overflow:hidden;}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--accent,var(--red));}
+.kpi.red{--accent:var(--red);}
+.kpi.gold{--accent:var(--gold);}
+.kpi.blue{--accent:var(--blue);}
+.kpi.green{--accent:var(--green);}
+.kpi.bronze{--accent:var(--bronze);}
+.kl{font-size:9px;font-weight:600;letter-spacing:.9px;color:var(--t2);text-transform:uppercase;margin-bottom:6px;}
+.kv{font-family:var(--mono);font-size:21px;font-weight:500;line-height:1.1;color:var(--t1);}
+.ks{font-size:10px;color:var(--t3);margin-top:3px;}
+.kd{font-size:10px;margin-top:5px;font-weight:500;}
+.kd.up{color:var(--green);}
+.kd.warn{color:var(--gold);}
+.kd.note{color:var(--t3);}
+
+/* CARD */
+.card{background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;overflow:hidden;}
+.card-h{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;border-bottom:1px solid var(--bdr);gap:8px;flex-wrap:wrap;}
+.card-t{font-size:12px;font-weight:600;color:var(--t1);}
+.card-sub{font-size:10px;color:var(--t2);font-family:var(--mono);}
+.card-b{padding:16px;}
+
+/* TABLE */
+.twrap{overflow-x:auto;}
+table.dt{width:100%;border-collapse:collapse;font-size:11.5px;}
+table.dt thead tr{background:var(--bg3);}
+table.dt th{padding:8px 12px;text-align:left;font-size:9px;font-weight:600;letter-spacing:.9px;color:var(--t2);text-transform:uppercase;white-space:nowrap;border-bottom:1px solid var(--bdr2);}
+table.dt td{padding:9px 12px;border-bottom:1px solid var(--bdr);color:var(--t1);vertical-align:middle;}
+table.dt tbody tr:hover td{background:var(--bg3);}
+table.dt tbody tr:last-child td{border-bottom:none;}
+.tn{font-family:var(--mono);text-align:right;white-space:nowrap;}
+.tc-red{color:var(--red)!important;}
+.tc-bronze{color:var(--bronze)!important;}
+.tc-gold{color:var(--gold)!important;}
+.tc-blue{color:var(--blue)!important;}
+.tc-green{color:var(--green)!important;}
+.tc-dim{color:var(--t2)!important;}
+
+/* BADGE */
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:3px;font-size:9px;font-weight:600;letter-spacing:.5px;border:1px solid;}
+.b-ok{background:var(--green-d);color:var(--green);border-color:var(--green-b);}
+.b-warn{background:var(--gold-d);color:var(--gold);border-color:rgba(212,160,23,.3);}
+.b-red{background:var(--red-d);color:var(--red);border-color:var(--red-b);}
+.b-blue{background:var(--blue-d);color:var(--blue);border-color:var(--blue-b);}
+.b-bronze{background:var(--bronze-d);color:var(--bronze);border-color:var(--bronze-b);}
+.b-dim{background:var(--bg3);color:var(--t2);border-color:var(--bdr);}
+
+/* STAT LIST */
+.statlist{display:flex;flex-direction:column;}
+.statrow{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--bdr);}
+.statrow:last-child{border-bottom:none;}
+.statlbl{font-size:11px;color:var(--t2);}
+.statval{font-family:var(--mono);font-size:11.5px;font-weight:500;}
+
+/* STREAM BARS */
+.slist{display:flex;flex-direction:column;gap:9px;}
+.srow{display:flex;align-items:center;gap:10px;}
+.sname{font-size:11px;color:var(--t2);min-width:175px;white-space:nowrap;}
+.sbar{flex:1;height:5px;background:var(--bg3);border-radius:3px;overflow:hidden;}
+.sbfill{height:100%;border-radius:3px;transition:width .6s ease;}
+.sval{font-family:var(--mono);font-size:11.5px;font-weight:500;white-space:nowrap;}
+
+/* PROGRESS BAR */
+.prog{display:flex;flex-direction:column;gap:4px;margin-bottom:10px;}
+.prog-lbl{display:flex;justify-content:space-between;font-size:10px;color:var(--t2);}
+.prog-bar{height:5px;background:var(--bg3);border-radius:3px;overflow:hidden;}
+.prog-fill{height:100%;border-radius:3px;}
+
+/* DIVIDER */
+.divider{border:none;border-top:1px solid var(--bdr);margin:10px 0;}
+
+/* NOTEBOX */
+.notebox{background:var(--bg3);border-left:3px solid var(--red);border-radius:0 6px 6px 0;padding:10px 14px;font-size:11px;color:var(--t2);line-height:1.6;}
+
+/* TIMELINE (methodology) */
+.tl{display:flex;flex-direction:column;position:relative;padding-left:24px;}
+.tl::before{content:'';position:absolute;left:7px;top:6px;bottom:6px;width:1px;background:var(--bdr2);}
+.tli{position:relative;padding-bottom:18px;}
+.tldot{position:absolute;left:-20px;top:4px;width:10px;height:10px;border-radius:50%;border:2px solid var(--bg2);}
+.tlstep{font-size:9px;font-family:var(--mono);color:var(--t3);margin-bottom:2px;}
+.tltitle{font-size:12px;font-weight:600;color:var(--t1);margin-bottom:3px;}
+.tlbody{font-size:11px;color:var(--t2);line-height:1.6;}
+.tlformula{font-family:var(--mono);font-size:11px;color:var(--blue);background:var(--blue-d);border:1px solid var(--blue-b);border-radius:5px;padding:8px 12px;margin-top:6px;line-height:1.7;}
+
+/* PHASE BLOCKS */
+.phases{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border:1px solid var(--bdr);border-radius:8px;overflow:hidden;}
+.phase{padding:14px 16px;border-right:1px solid var(--bdr);position:relative;}
+.phase:last-child{border-right:none;}
+.phase::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--ph-c,var(--red));}
+.phase.active{background:var(--bg3);}
+.ph-label{font-size:9px;font-weight:600;letter-spacing:.8px;color:var(--ph-c,var(--red));text-transform:uppercase;margin-bottom:6px;}
+.ph-veh{font-family:var(--mono);font-size:16px;font-weight:500;color:var(--t1);}
+.ph-yr{font-size:10px;color:var(--t2);margin-top:2px;}
+.ph-ebitda{font-family:var(--mono);font-size:11px;margin-top:8px;}
+.ph-invest{font-size:10px;color:var(--t2);margin-top:3px;}
+
+/* RESPONSIVE */
+@media(max-width:1100px){.g4,.g3{grid-template-columns:1fr 1fr;}.g2,.g21{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sb-brand">
+    <div class="sb-badge"><span class="sb-dot"></span>INTERNAL · CONFIDENTIAL</div>
+    <div class="sb-title">CFI<br>Dashboard</div>
+    <div class="sb-sub">Carbon Fleet Intelligence<br>Michelin Internal View</div>
+  </div>
+
+  <div class="sb-sec">Navigation</div>
+  <div class="nav-item active" onclick="go('overview',this)"><span class="nav-ico">&#9672;</span>Platform Overview</div>
+  <div class="nav-item" onclick="go('revenue',this)"><span class="nav-ico">&#9685;</span>Revenue &amp; P&amp;L</div>
+  <div class="nav-item" onclick="go('operators',this)"><span class="nav-ico">&#9678;</span>Operator Pipeline</div>
+  <div class="nav-item" onclick="go('retreading',this)"><span class="nav-ico">&#8635;</span>Retreading Ops</div>
+  <div class="nav-item" onclick="go('methodology',this)"><span class="nav-ico">&#9670;</span>Carbon Methodology</div>
+  <div class="nav-item" onclick="go('esgstar',this)"><span class="nav-ico">&#9733;</span>ESG Star</div>
+
+  <div class="sb-footer">
+    <div style="font-weight:600;color:var(--t1);margin-bottom:4px">Phase 1 Status</div>
+    <div>&#9679; 500 vehicles live</div>
+    <div>&#9679; SF Express target</div>
+    <div>&#9679; Carbon Ledger active</div>
+    <div style="margin-top:6px;color:var(--gold)">&#9679; MEE submission Q3 2026</div>
+    <div style="margin-top:8px;font-size:9px;color:var(--t3)">Financial model: Conqueror Strath<br>CFI v150426 · Apr 2026</div>
+  </div>
+</aside>
+
+<!-- MAIN AREA -->
+<div class="main">
+  <div class="topbar">
+    <div class="tb-left">
+      <div class="tb-title">CFI Carbon Fleet Intelligence &mdash; Michelin Internal Dashboard</div>
+      <div class="tb-meta">INNOVATEChina 2026 &middot; CONQUERORS &middot; University of Strathclyde MBA &middot; Smart Logistics Scenario</div>
+    </div>
+    <div class="tb-right">
+      <span class="pill pill-green">&#9679; Phase 1 Live</span>
+      <span class="pill pill-blue">MEE Submission Q3</span>
+    </div>
+  </div>
+
+  <div class="content">
+
+<!-- ══════════════ PAGE: OVERVIEW ══════════════ -->
+<section class="page active" id="pg-overview">
+  <div class="ph">
+    <div>
+      <div class="ph-title">Platform <em>Overview</em></div>
+      <div class="ph-sub">CFI Phase 1 &middot; SF Express pilot &middot; April 2026 &middot; Michelin internal view</div>
+    </div>
+    <div class="ph-actions">
+      <button class="btn">Export Board Report</button>
+      <button class="btn btn-primary">Phase 2 Readiness &rarr;</button>
+    </div>
+  </div>
+
+  <!-- Phase progression -->
+  <div class="phases">
+    <div class="phase active" style="--ph-c:var(--red)">
+      <div class="ph-label">Phase 1 &middot; Active</div>
+      <div class="ph-veh">500 veh</div>
+      <div class="ph-yr">Year 1 &middot; SF Express pilot</div>
+      <div class="ph-ebitda" style="color:var(--gold)">($1,458K) EBITDA</div>
+      <div class="ph-invest">Invest: $2,835K &middot; RMB 23M</div>
+    </div>
+    <div class="phase" style="--ph-c:var(--blue)">
+      <div class="ph-label">Phase 2A &middot; Target</div>
+      <div class="ph-veh">15,000 veh</div>
+      <div class="ph-yr">Year 2 &middot; SF Express expansion</div>
+      <div class="ph-ebitda" style="color:var(--green)">+$23,884K EBITDA</div>
+      <div class="ph-invest">Invest: $8,320K &middot; RMB 69M</div>
+    </div>
+    <div class="phase" style="--ph-c:var(--green)">
+      <div class="ph-label">Phase 2B &middot; Target</div>
+      <div class="ph-veh">50,000 veh</div>
+      <div class="ph-yr">Year 3</div>
+      <div class="ph-ebitda" style="color:var(--green)">+$82,505K EBITDA</div>
+      <div class="ph-invest">Invest: $11,605K &middot; RMB 96M</div>
+    </div>
+    <div class="phase" style="--ph-c:var(--gold)">
+      <div class="ph-label">Phase 3 &middot; Vision</div>
+      <div class="ph-veh">300,000 veh</div>
+      <div class="ph-yr">Year 4+</div>
+      <div class="ph-ebitda" style="color:var(--green)">+$511,920K EBITDA</div>
+      <div class="ph-invest">Invest: $28,175K &middot; RMB 232M</div>
+    </div>
+  </div>
+
+  <!-- KPIs -->
+  <div class="g4">
+    <div class="kpi red"><div class="kl">Year 1 Revenue</div><div class="kv">$564K</div><div class="ks">500 vehicles &middot; $1,128/veh/yr</div><div class="kd warn">Retreading ramps Month 7+</div></div>
+    <div class="kpi gold"><div class="kl">Year 1 EBITDA</div><div class="kv">($1,458K)</div><div class="ks">Planned investment phase</div><div class="kd warn">Payback: Phase 2 Year 2</div></div>
+    <div class="kpi green"><div class="kl">Phase 2 EBITDA (50K veh)</div><div class="kv">$82,505K</div><div class="ks">Year 3 &middot; 91.1% margin</div><div class="kd up">Cumulative +$104,932K</div></div>
+    <div class="kpi blue"><div class="kl">Contribution Margin Y3+</div><div class="kv">93.9%</div><div class="ks">Variable cost $112/veh</div><div class="kd up">&#8593; from 88.2% Year 1</div></div>
+  </div>
+
+  <div class="g2">
+    <!-- Revenue by stream -->
+    <div class="card">
+      <div class="card-h"><span class="card-t">Revenue by Stream &mdash; Year 1 (500 vehicles)</span><span class="card-sub tc-red">$564K total</span></div>
+      <div class="card-b">
+        <div class="slist">
+          <div class="srow"><span class="sname">Retreading Margin (50% ramp)</span><div class="sbar"><div class="sbfill" style="width:60%;background:var(--bronze)"></div></div><span class="sval tc-bronze">$342K</span></div>
+          <div class="srow"><span class="sname">TaaS Subscription</span><div class="sbar"><div class="sbfill" style="width:32%;background:var(--red)"></div></div><span class="sval tc-red">$180K</span></div>
+          <div class="srow"><span class="sname">Data Premium (GRI reports)</span><div class="sbar"><div class="sbfill" style="width:7%;background:var(--blue)"></div></div><span class="sval tc-blue">$42K</span></div>
+          <div class="srow"><span class="sname">CCER Methodology Fee</span><div class="sbar"><div class="sbfill" style="width:0%"></div></div><span class="sval tc-gold">$0 (Year 3+)</span></div>
+        </div>
+        <div class="divider"></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+          <span style="font-size:11px;font-weight:600">Year 1 Total</span>
+          <span style="font-family:var(--mono);font-size:16px;font-weight:500;color:var(--red)">$564K</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--t2);margin-bottom:3px">
+          <span>Year 2 (15K veh)</span><span style="font-family:var(--mono);color:var(--bronze)">$27,180K</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--t2);margin-bottom:3px">
+          <span>Year 3 (50K veh)</span><span style="font-family:var(--mono);color:var(--bronze)">$90,600K</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--t2)">
+          <span>Phase 3 (300K veh)</span><span style="font-family:var(--mono);color:var(--bronze)">$554,100K</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Commercial highlights -->
+    <div class="card">
+      <div class="card-h"><span class="card-t">Commercial Highlights</span><span class="card-sub tc-green">Pius Owusu-Ansah v150426</span></div>
+      <div class="card-b">
+        <div class="statlist">
+          <div class="statrow"><span class="statlbl">Phase 1 investment</span><span class="statval tc-red">$2,835K (RMB 23M)</span></div>
+          <div class="statrow"><span class="statlbl">Year 1 cash burn</span><span class="statval tc-red">$1,458K</span></div>
+          <div class="statrow"><span class="statlbl">Break-even (Phase 2 base)</span><span class="statval tc-gold">2,915 vehicles</span></div>
+          <div class="statrow"><span class="statlbl">Payback</span><span class="statval tc-green">Phase 2 (Year 2)</span></div>
+          <div class="statrow"><span class="statlbl">CAC per vehicle</span><span class="statval">$140</span></div>
+          <div class="statrow"><span class="statlbl">Switching cost</span><span class="statval tc-green">Unbounded &mdash; compounds every year</span></div>
+          <div class="statrow"><span class="statlbl">Operator net saving Year 1</span><span class="statval tc-green">$3,279/veh &middot; 3.9&times; return</span></div>
+          <div class="statrow"><span class="statlbl">CCER Year 1&ndash;2</span><span class="statval tc-gold">$0 &mdash; MEE approval pending</span></div>
+          <div class="statrow"><span class="statlbl">CCER Year 3+ (operator)</span><span class="statval tc-green">$116/veh/yr @ RMB 93/t</span></div>
+        </div>
+        <div class="notebox" style="margin-top:12px">Market signal: Samsara $20B IPO &mdash; fleet telematics only. No ESG. No retreading. No carbon. One geography. CFI adds all three layers plus 2026 CSRC mandate.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 2 readiness -->
+  <div class="card">
+    <div class="card-h"><span class="card-t">Phase 2 Readiness &mdash; KPI Tracker</span><span class="badge b-ok">4 of 4 KPIs met</span></div>
+    <div class="card-b">
+      <div class="g2">
+        <div>
+          <table class="dt">
+            <thead><tr><th>KPI</th><th>Target</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>Carbon intensity reduction</td><td>&ge;8% fleet-wide</td><td><span class="badge b-ok">&#10003; 12.4%</span></td></tr>
+              <tr><td>First ESG Bronze issued</td><td>1 operator</td><td><span class="badge b-ok">&#10003; Mar 2026</span></td></tr>
+              <tr><td>CCER methodology submitted</td><td>MEE submission</td><td><span class="badge b-ok">&#10003; Month 9</span></td></tr>
+              <tr><td>Phase 1 P&amp;L validated</td><td>Board sign-off</td><td><span class="badge b-ok">&#10003; Pius v150426</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div>
+          <div class="prog"><div class="prog-lbl"><span>Phase 1 &rarr; Phase 2 readiness</span><span style="color:var(--green)">85%</span></div><div class="prog-bar"><div class="prog-fill" style="width:85%;background:var(--green)"></div></div></div>
+          <div class="prog"><div class="prog-lbl"><span>CCER MEE approval pathway</span><span style="color:var(--gold)">40%</span></div><div class="prog-bar"><div class="prog-fill" style="width:40%;background:var(--gold)"></div></div></div>
+          <div class="prog"><div class="prog-lbl"><span>Carbon Ledger blockchain integrity</span><span style="color:var(--green)">100%</span></div><div class="prog-bar"><div class="prog-fill" style="width:100%;background:var(--green)"></div></div></div>
+          <div class="prog"><div class="prog-lbl"><span>SF Express &rarr; 15K expansion readiness</span><span style="color:var(--blue)">70%</span></div><div class="prog-bar"><div class="prog-fill" style="width:70%;background:var(--blue)"></div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ PAGE: REVENUE & P&L ══════════════ -->
+<section class="page" id="pg-revenue">
+  <div class="ph">
+    <div>
+      <div class="ph-title">Revenue <em>&amp; P&amp;L</em></div>
+      <div class="ph-sub">All figures: Pius Owusu-Ansah &middot; CFI Financial Model v150426 &middot; April 2026</div>
+    </div>
+    <div class="ph-actions"><button class="btn">Export P&amp;L</button></div>
+  </div>
+
+  <div class="g4">
+    <div class="kpi red"><div class="kl">Phase 1 &middot; Y1 &middot; 500 veh</div><div class="kv">$564K</div><div class="ks">EBITDA ($1,458K)</div><div class="kd warn">Invest: $2,835K</div></div>
+    <div class="kpi bronze"><div class="kl">Phase 2A &middot; Y2 &middot; 15K veh</div><div class="kv">$27,180K</div><div class="ks">EBITDA $23,884K &middot; 87.9%</div><div class="kd up">&#10003; Payback achieved</div></div>
+    <div class="kpi green"><div class="kl">Phase 2B &middot; Y3 &middot; 50K veh</div><div class="kv">$90,600K</div><div class="ks">EBITDA $82,505K &middot; 91.1%</div><div class="kd up">Cum. +$104,932K</div></div>
+    <div class="kpi blue"><div class="kl">Phase 3 &middot; Y4+ &middot; 300K veh</div><div class="kv">$554,100K</div><div class="ks">EBITDA $511,920K &middot; 92.4%</div><div class="kd up">+ CCER $10,500K (MEE)</div></div>
+  </div>
+
+  <div class="g2">
+    <!-- Full P&L -->
+    <div class="card">
+      <div class="card-h"><span class="card-t">Three-Year P&amp;L Summary ($000s USD)</span><span class="card-sub tc-green">Pius v150426</span></div>
+      <div class="card-b">
+        <table class="dt">
+          <thead><tr><th>Line Item</th><th class="tn">Y1 (500)</th><th class="tn">Y2 (15K)</th><th class="tn">Y3 (50K)</th></tr></thead>
+          <tbody>
+            <tr><td colspan="4" style="font-size:9px;color:var(--t3);font-weight:600;letter-spacing:.8px;padding-top:10px">REVENUE</td></tr>
+            <tr><td>S1 &mdash; TaaS Subscription</td><td class="tn">$180K</td><td class="tn">$5,400K</td><td class="tn">$18,000K</td></tr>
+            <tr><td>S2 &mdash; Retreading Margin</td><td class="tn tc-bronze">$342K</td><td class="tn tc-bronze">$20,520K</td><td class="tn tc-bronze">$68,400K</td></tr>
+            <tr><td>S3 &mdash; CCER Credits</td><td class="tn tc-gold">$0</td><td class="tn tc-gold">$0</td><td class="tn tc-gold">$0</td></tr>
+            <tr><td>S4 &mdash; Data Premium</td><td class="tn">$42K</td><td class="tn">$1,260K</td><td class="tn">$4,200K</td></tr>
+            <tr style="font-weight:600"><td>TOTAL REVENUE</td><td class="tn tc-red">$564K</td><td class="tn tc-red">$27,180K</td><td class="tn tc-red">$90,600K</td></tr>
+            <tr><td colspan="4" style="font-size:9px;color:var(--t3);font-weight:600;letter-spacing:.8px;padding-top:10px">COSTS</td></tr>
+            <tr><td>Variable costs</td><td class="tn">($67K)</td><td class="tn">($1,995K)</td><td class="tn">($6,650K)</td></tr>
+            <tr><td>Platform &amp; fixed costs</td><td class="tn">($1,955K)</td><td class="tn">($1,301K)</td><td class="tn">($1,445K)</td></tr>
+            <tr style="font-weight:600"><td>TOTAL COSTS</td><td class="tn">($2,022K)</td><td class="tn">($3,296K)</td><td class="tn">($8,095K)</td></tr>
+            <tr style="font-weight:700;border-top:2px solid var(--bdr2)">
+              <td>EBITDA</td>
+              <td class="tn tc-red">($1,458K)</td>
+              <td class="tn tc-green">+$23,884K</td>
+              <td class="tn tc-green">+$82,505K</td>
+            </tr>
+            <tr><td style="font-size:10px;color:var(--t2)">EBITDA Margin</td><td class="tn" style="font-size:10px;color:var(--t3)">&mdash;</td><td class="tn tc-green" style="font-size:10px">87.9%</td><td class="tn tc-green" style="font-size:10px">91.1%</td></tr>
+            <tr><td style="font-size:10px;color:var(--t2)">Cumulative EBITDA</td><td class="tn tc-red" style="font-size:10px">($1,458K)</td><td class="tn tc-green" style="font-size:10px">+$22,427K</td><td class="tn tc-green" style="font-size:10px">+$104,932K</td></tr>
+          </tbody>
+        </table>
+        <div class="notebox" style="margin-top:12px">CCER = $0 in Years 1&ndash;3. Year 3+ conditional on MEE logistics fleet methodology approval. CFI is creating this market. Phase 3 CCER at base RMB 93/t: +$10,500K additional revenue.</div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <!-- Unit economics -->
+      <div class="card">
+        <div class="card-h"><span class="card-t">Unit Economics Per Vehicle Per Year (USD)</span><span class="card-sub">UNIT tab v150426</span></div>
+        <div class="card-b">
+          <table class="dt">
+            <thead><tr><th>Stream</th><th class="tn">Y1</th><th class="tn">Y2</th><th class="tn">Y3+</th></tr></thead>
+            <tbody>
+              <tr><td>TaaS Subscription</td><td class="tn">$360</td><td class="tn">$360</td><td class="tn">$360</td></tr>
+              <tr><td>Retreading Margin</td><td class="tn tc-bronze">$684</td><td class="tn tc-bronze">$1,368</td><td class="tn tc-bronze">$1,368</td></tr>
+              <tr><td>CCER Fee (Michelin 10%)</td><td class="tn tc-gold">$0</td><td class="tn tc-gold">$0</td><td class="tn tc-gold">$12</td></tr>
+              <tr><td>Data Premium</td><td class="tn">$84</td><td class="tn">$84</td><td class="tn">$84</td></tr>
+              <tr style="font-weight:700"><td>TOTAL / vehicle</td><td class="tn tc-red">$1,128</td><td class="tn tc-red">$1,812</td><td class="tn tc-red">$1,824</td></tr>
+              <tr><td style="color:var(--t2)">Variable cost</td><td class="tn">$133</td><td class="tn">$116</td><td class="tn">$112</td></tr>
+              <tr><td style="color:var(--t2)">Contribution margin</td><td class="tn tc-green">88.2%</td><td class="tn tc-green">93.6%</td><td class="tn tc-green">93.9%</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <!-- Phase investment -->
+      <div class="card">
+        <div class="card-h"><span class="card-t">Phase Investment ($000s USD)</span><span class="card-sub">PHASES tab</span></div>
+        <div class="card-b">
+          <table class="dt">
+            <thead><tr><th>Phase</th><th class="tn">Investment</th><th class="tn">RMB</th></tr></thead>
+            <tbody>
+              <tr><td>Phase 1 &middot; Y1 &middot; 500 veh</td><td class="tn tc-red">$2,835K</td><td class="tn">RMB 23M</td></tr>
+              <tr><td>Phase 2A &middot; Y2</td><td class="tn">$8,320K</td><td class="tn">RMB 69M</td></tr>
+              <tr><td>Phase 2B &middot; Y3</td><td class="tn">$11,605K</td><td class="tn">RMB 96M</td></tr>
+              <tr><td>Phase 3 &middot; Y4+</td><td class="tn">$28,175K</td><td class="tn">RMB 232M</td></tr>
+            </tbody>
+          </table>
+          <div style="margin-top:10px;display:flex;flex-direction:column;gap:5px">
+            <div style="display:flex;justify-content:space-between;font-size:11px">
+              <span style="color:var(--t2)">Break-even (Phase 2 base)</span>
+              <span style="font-family:var(--mono);color:var(--gold)">2,915 vehicles</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:11px">
+              <span style="color:var(--t2)">Switching cost</span>
+              <span style="font-family:var(--mono);color:var(--green)">Unbounded</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scenario analysis -->
+  <div class="card">
+    <div class="card-h"><span class="card-t">Phase 2 Scenario Analysis (SCEN tab v150426)</span></div>
+    <div class="card-b">
+      <table class="dt">
+        <thead><tr><th>Metric</th><th class="tn">Downside</th><th class="tn" style="color:var(--red)">Base Case</th><th class="tn">Upside</th></tr></thead>
+        <tbody>
+          <tr><td colspan="4" style="font-size:9px;color:var(--t3);font-weight:600;padding-top:8px">INPUTS</td></tr>
+          <tr><td>Phase 2 vehicles</td><td class="tn">30,000</td><td class="tn tc-red">50,000</td><td class="tn">70,000</td></tr>
+          <tr><td>Avg revenue / veh / yr</td><td class="tn">$1,400</td><td class="tn tc-red">$1,812</td><td class="tn">$2,100</td></tr>
+          <tr><td>Variable cost / veh / yr</td><td class="tn">$160</td><td class="tn tc-red">$133</td><td class="tn">$110</td></tr>
+          <tr><td>Fixed costs ($000s)</td><td class="tn">$3,500K</td><td class="tn tc-red">$2,900K</td><td class="tn">$2,500K</td></tr>
+          <tr><td colspan="4" style="font-size:9px;color:var(--t3);font-weight:600;padding-top:8px">OUTPUTS</td></tr>
+          <tr><td>Revenue</td><td class="tn">$42,000K</td><td class="tn tc-red">$90,600K</td><td class="tn">$147,000K</td></tr>
+          <tr><td>EBITDA</td><td class="tn">$33,700K</td><td class="tn tc-red">$81,050K</td><td class="tn">$136,800K</td></tr>
+          <tr><td>EBITDA Margin</td><td class="tn">80.2%</td><td class="tn tc-red">89.5%</td><td class="tn">93.1%</td></tr>
+          <tr><td>Break-even vehicles</td><td class="tn">3,518</td><td class="tn tc-red">2,915</td><td class="tn">2,513</td></tr>
+        </tbody>
+      </table>
+      <div class="notebox" style="margin-top:12px">Cold chain upside (10% penetration, Segment B): +$14,940K additional revenue. Cold chain WTP $4,800/veh vs $1,812 standard. Michelin Guide D4 bridge creates 4&times; premium. Retreading tailwind stronger for EV fleets (20&ndash;30% faster wear).</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ PAGE: OPERATORS ══════════════ -->
+<section class="page" id="pg-operators">
+  <div class="ph">
+    <div>
+      <div class="ph-title">Operator <em>Pipeline</em></div>
+      <div class="ph-sub">Phase 1 active &middot; Phase 2 targets &middot; SF Express as anchor &middot; 500&rarr;15K is one account expansion</div>
+    </div>
+    <div class="ph-actions"><button class="btn">Export Pipeline</button></div>
+  </div>
+
+  <div class="g4">
+    <div class="kpi red"><div class="kl">Phase 1 Active</div><div class="kv">1</div><div class="ks">500 vehicles &middot; SF Express pilot</div></div>
+    <div class="kpi bronze"><div class="kl">Phase 2 Pipeline</div><div class="kv">6</div><div class="ks">Enterprise operators identified</div></div>
+    <div class="kpi green"><div class="kl">Phase 2 Target Vehicles</div><div class="kv">15,000</div><div class="ks">Single SF Express expansion</div></div>
+    <div class="kpi blue"><div class="kl">Phase 3 Addressable</div><div class="kv">300,000</div><div class="ks">5 enterprise accounts</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-h"><span class="card-t">Phase 1 &mdash; Active Operator</span><span class="badge b-ok">Live &middot; Carbon Ledger Active</span></div>
+    <div class="card-b">
+      <table class="dt">
+        <thead><tr><th>Operator</th><th>Vehicles</th><th>Segment</th><th>ESG Star</th><th>CO&#8322; Reduced</th><th>Rev / Yr</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr>
+            <td style="font-weight:600">SF Express (pilot)</td>
+            <td class="tn">500</td>
+            <td>Long-Haul HDL</td>
+            <td><span class="badge b-bronze">&#9733; Bronze</span></td>
+            <td class="tn tc-green">4,270t/yr</td>
+            <td class="tn tc-red">$564K</td>
+            <td><span class="badge b-ok">LIVE</span></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="notebox" style="margin-top:12px">SF Express: Shenzhen Stock Exchange listed. 2026 CSRC mandatory disclosure applies. Zero Carbon Future strategy. 40,000+ NEVs deployed. Estimated 15,000&ndash;20,000 HDL trucks. Phase 1&rarr;Phase 2 scale-up is one contract expansion, not a new sales campaign.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-h"><span class="card-t">Phase 2 Pipeline &mdash; Enterprise Targets</span><span class="card-sub">$27M ARR at 15K vehicles</span></div>
+    <div class="card-b">
+      <div class="twrap">
+        <table class="dt">
+          <thead><tr><th>Operator</th><th>Segment</th><th>HDL Fleet Est.</th><th>ARR Potential</th><th>Urgency</th><th>Stage</th><th>Route In</th></tr></thead>
+          <tbody id="pipelineBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ PAGE: RETREADING ══════════════ -->
+<section class="page" id="pg-retreading">
+  <div class="ph">
+    <div>
+      <div class="ph-title">Retreading <em>Operations</em></div>
+      <div class="ph-sub">65% of total CFI revenue &middot; Both parties win from the same transaction &middot; Sensor-triggered automatically</div>
+    </div>
+  </div>
+
+  <div class="g4">
+    <div class="kpi bronze"><div class="kl">Retreading Rev / Veh / Yr</div><div class="kv">$1,368</div><div class="ks">Steady-state &middot; 6 tyres &times; 1.5 cycles</div><div class="kd note">Year 1: $684 (50% ramp)</div></div>
+    <div class="kpi red"><div class="kl">% of Total CFI Revenue</div><div class="kv">65%</div><div class="ks">Largest single stream at steady state</div></div>
+    <div class="kpi green"><div class="kl">Operator Saving vs New</div><div class="kv">35%</div><div class="ks">RMB 2,503 vs RMB 3,850 &middot; same warranty</div><div class="kd up">Both sides win from same transaction</div></div>
+    <div class="kpi blue"><div class="kl">CO&#8322; Avoided / Retread</div><div class="kv">30 kg</div><div class="ks">Conservative EF &middot; USTMA LCA 2021</div><div class="kd note">New tyre: 72kg &middot; Retread: 15.3kg</div></div>
+  </div>
+
+  <div class="g2">
+    <div class="card">
+      <div class="card-h"><span class="card-t">Retreading Economics (UNIT tab v150426)</span><span class="card-sub tc-bronze">$1,368/veh steady state</span></div>
+      <div class="card-b">
+        <div class="statlist">
+          <div class="statrow"><span class="statlbl">New tyre cost per tyre</span><span class="statval">RMB 3,850</span></div>
+          <div class="statrow"><span class="statlbl">Retreaded tyre cost</span><span class="statval tc-green">RMB 2,503 (35% saving)</span></div>
+          <div class="statrow"><span class="statlbl">Michelin margin per retread</span><span class="statval tc-bronze">~RMB 1,100</span></div>
+          <div class="statrow"><span class="statlbl">Retreads per vehicle per year (6 &times; 1.5)</span><span class="statval">9 retreads</span></div>
+          <div class="statrow"><span class="statlbl">Retreading revenue Year 1 (50% ramp)</span><span class="statval tc-bronze">$684/veh</span></div>
+          <div class="statrow"><span class="statlbl">Retreading revenue Year 2+ (full cycle)</span><span class="statval tc-bronze">$1,368/veh</span></div>
+          <div class="statrow"><span class="statlbl">Phase 3 retreading revenue (300K veh)</span><span class="statval tc-bronze">$410,400K/yr</span></div>
+          <div class="statrow"><span class="statlbl">Phase 3 tyres diverted from landfill</span><span class="statval tc-green">2.7M tyres/yr</span></div>
+          <div class="statrow"><span class="statlbl">Operator TCO saving (fuel + retreading)</span><span class="statval tc-green">$4,407/veh/yr</span></div>
+          <div class="statrow"><span class="statlbl">Net saving after CFI cost ($1,128)</span><span class="statval tc-green">$3,279/veh &middot; 3.9&times; return</span></div>
+        </div>
+        <div class="notebox" style="margin-top:12px">CFI sensor creates the retreading trigger automatically. Without pressure/wear monitoring, China retreading rate stays under 5%. CFI makes the 35% cost saving visible and automatic &mdash; operators pay less, Michelin earns higher margin than on new tyres.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-h"><span class="card-t">Active Retreading Queue &mdash; Phase 1 (500 veh)</span><span class="card-sub">3,000 sensors &middot; 10-12% annual failure rate</span></div>
+      <div class="card-b">
+        <div class="twrap">
+          <table class="dt">
+            <thead><tr><th>Vehicle ID</th><th>Operator</th><th class="tn">Wear</th><th>ETA</th><th>Cycle</th><th class="tn">Revenue</th><th>Status</th></tr></thead>
+            <tbody id="retreadBody"></tbody>
+          </table>
+        </div>
+        <div style="margin-top:14px;background:var(--bg3);border-radius:6px;padding:12px">
+          <div style="font-size:9px;font-weight:600;letter-spacing:.9px;color:var(--t2);text-transform:uppercase;margin-bottom:8px">Sensor Operational Reality</div>
+          <div class="statlist">
+            <div class="statrow"><span class="statlbl">Failure rate (conservative)</span><span class="statval tc-green">10-12% annual</span></div>
+            <div class="statrow"><span class="statlbl">Replacements / yr (500 veh &times; 6 tyres)</span><span class="statval tc-green">300-360 sensors</span></div>
+            <div class="statrow"><span class="statlbl">Materials (RMB 150-200 / sensor)</span><span class="statval">RMB 45K-72K/yr</span></div>
+            <div class="statrow"><span class="statlbl">Inspection team (2 technicians)</span><span class="statval">RMB 192K/yr</span></div>
+            <div class="statrow"><span class="statlbl">Total sensor ops budget</span><span class="statval tc-green">RMB 237K-264K (&lt;3% revenue)</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ PAGE: CARBON METHODOLOGY ══════════════ -->
+<section class="page" id="pg-methodology">
+  <div class="ph">
+    <div>
+      <div class="ph-title">Carbon <em>Methodology</em></div>
+      <div class="ph-sub">CFI CCER-Ready v1.2 &middot; GRI co-developed &middot; MEE approves &middot; MIIT is policy beneficiary &middot; Dual verification: Bureau Veritas + SGS</div>
+    </div>
+    <div class="ph-actions">
+      <span class="badge b-blue">GRI co-develops</span>
+      <span class="badge b-red">MEE approves</span>
+      <span class="badge b-dim">MIIT: policy beneficiary</span>
+    </div>
+  </div>
+
+  <!-- Regulatory framing -->
+  <div class="card">
+    <div class="card-h"><span class="card-t">Regulatory Roles &mdash; Who Does What</span></div>
+    <div class="card-b">
+      <div class="g3">
+        <div style="border-right:1px solid var(--bdr);padding-right:16px">
+          <div style="font-size:10px;font-weight:600;letter-spacing:1px;color:var(--blue);text-transform:uppercase;margin-bottom:8px">GRI International</div>
+          <div style="font-size:11px;color:var(--t2);line-height:1.6">Co-develops the carbon methodology framework with CFI. Provides international credibility. GRI 305/306 alignment enables CSRC mandatory disclosure auto-generation from Month 1. Methodology is jointly owned &mdash; not proprietary to Michelin.</div>
+        </div>
+        <div style="border-right:1px solid var(--bdr);padding:0 16px">
+          <div style="font-size:10px;font-weight:600;letter-spacing:1px;color:var(--red);text-transform:uppercase;margin-bottom:8px">MEE (Ministry of Ecology)</div>
+          <div style="font-size:11px;color:var(--t2);line-height:1.6">The approval authority for CCER v2 methodologies. CFI has submitted the logistics fleet carbon intensity reduction methodology. MEE approval is the gateway to Year 3+ CCER revenue. All CCER = $0 until MEE approves. CFI is creating this market.</div>
+        </div>
+        <div style="padding-left:16px">
+          <div style="font-size:10px;font-weight:600;letter-spacing:1px;color:var(--gold);text-transform:uppercase;margin-bottom:8px">MIIT (Policy Beneficiary)</div>
+          <div style="font-size:11px;color:var(--t2);line-height:1.6">CFI is not asking MIIT to do something. CFI is handing MIIT a solved logistics decarbonisation problem at zero government cost. CFI is aligned with MIIT 15th FYP logistics decarbonisation targets. MIIT benefits from CFI existing.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ESG KPIs -->
+  <div class="g4">
+    <div class="kpi green"><div class="kl">CO&#8322; Reduced / Veh / Yr</div><div class="kv">8.54t</div><div class="ks">7.50t fuel + 1.04t retreading</div><div class="kd up">Michelin TMC + REMIX 2</div></div>
+    <div class="kpi blue"><div class="kl">Fuel Saved / Vehicle</div><div class="kv">2,800L</div><div class="ks">4% pressure optimisation &times; 70,000L/yr</div></div>
+    <div class="kpi gold"><div class="kl">CCER Status</div><div class="kv">Submitted</div><div class="ks">MEE approval pathway &middot; Year 3+ only</div><div class="kd warn">$0 in Years 1 and 2</div></div>
+    <div class="kpi bronze"><div class="kl">Phase 3 Cars Equivalent</div><div class="kv">1.2M</div><div class="ks">300K veh &times; 8.54t &divide; 2.1t/car (EEA 2023)</div></div>
+  </div>
+
+  <div class="g2">
+    <!-- 7-Step Methodology -->
+    <div class="card">
+      <div class="card-h"><span class="card-t">7-Step Carbon Methodology &mdash; CFI CCER-Ready v1.2</span><span class="badge b-blue">GRI co-developed</span></div>
+      <div class="card-b">
+        <div class="tl">
+
+          <div class="tli">
+            <div class="tldot" style="background:var(--red)"></div>
+            <div class="tlstep">STEP 1</div>
+            <div class="tltitle">Boundary Definition &amp; Functional Unit</div>
+            <div class="tlbody">
+              Scope 3 Category 11 (use of sold products &mdash; tyres in operation) and Category 12 (end-of-life tyre treatment via retreading).<br>
+              Functional unit: gCO&#8322; per vehicle-kilometre (gCO&#8322;/vkm).<br>
+              Geographic boundary: mainland China (CCER jurisdiction).<br>
+              Baseline period: first 90 days of sensor deployment per vehicle.<br>
+              Baseline stratified by: vehicle class, route type, load factor, season.
+            </div>
+          </div>
+
+          <div class="tli">
+            <div class="tldot" style="background:var(--red)"></div>
+            <div class="tlstep">STEP 2</div>
+            <div class="tltitle">Emissions Reduction Quantification</div>
+            <div class="tlformula">
+              ER = &Sigma; [ (BI<sub>i</sub> &minus; AI<sub>i</sub>) &times; D<sub>i</sub> &times; N<sub>i</sub> ]<br><br>
+              Where:<br>
+              &nbsp;&nbsp;ER &nbsp;&nbsp;= Total emissions reductions (tCO&#8322;e)<br>
+              &nbsp;&nbsp;BI<sub>i</sub> = Baseline intensity, segment i (gCO&#8322;/vkm)<br>
+              &nbsp;&nbsp;AI<sub>i</sub> = Actual monitored intensity, segment i (gCO&#8322;/vkm)<br>
+              &nbsp;&nbsp;D<sub>i</sub> &nbsp;= Distance travelled, segment i (km)<br>
+              &nbsp;&nbsp;N<sub>i</sub> &nbsp;= Number of vehicles, segment i
+            </div>
+            <div class="tlbody" style="margin-top:8px">
+              <strong>Retreading module:</strong> CO&#8322;_retread = N_retread &times; EF_avoided<br>
+              EF_avoided = 30.0 kgCO&#8322;/tyre (conservative: 40% discount on verified LCA diff of ~56.7 kgCO&#8322;).<br>
+              New tyre manufacture: 72.0 kgCO&#8322; &middot; Retread process: 15.3 kgCO&#8322; &middot; Source: USTMA LCA 2021.
+            </div>
+          </div>
+
+          <div class="tli">
+            <div class="tldot" style="background:var(--blue)"></div>
+            <div class="tlstep">STEP 3</div>
+            <div class="tltitle">Digital Monitoring, Reporting &amp; Verification (MRV)</div>
+            <div class="tlbody">
+              <strong>Data sources:</strong> Smart Predictive Tyre sensors (pressure, wear, temp every 15 min) &rarr; G7 telematics GPS (route, speed, load) &rarr; Engine OBD fuel consumption (Priority 1, where available).<br>
+              <strong>Carbon Ledger:</strong> Every reading SHA-256 hashed before writing to Alibaba BaaS blockchain. Any alteration is cryptographically detectable. 24,841+ entries as of Q2 2026.<br>
+              <strong>API access:</strong> Bureau Veritas and SGS granted read-only API access to the full Carbon Ledger for independent verification sampling.<br>
+              <strong>GRI auto-generation:</strong> GRI 305/306 ESG reports auto-generated from Carbon Ledger every quarter. CSRC disclosure package auto-generated from Month 1.
+            </div>
+          </div>
+
+          <div class="tli">
+            <div class="tldot" style="background:var(--blue)"></div>
+            <div class="tlstep">STEP 4</div>
+            <div class="tltitle">Leakage Assessment</div>
+            <div class="tlbody">
+              Three leakage sources assessed:<br>
+              &bull; <strong>Increased tyre production elsewhere:</strong> Retreading reduces new tyre demand. Any displacement reduces net emissions. Negative leakage &mdash; conservatively ignored.<br>
+              &bull; <strong>Rebound effect:</strong> Fleet operators run fixed contract schedules. No incremental driving observed in comparable G7 deployments. Negligible. No deduction applied.<br>
+              &bull; <strong>Upstream retreading inputs:</strong> Captured in the 40% discount on EF_avoided. No additional deduction.<br>
+              <strong>Overall leakage: negligible. No deduction applied to ER_calculated.</strong>
+            </div>
+          </div>
+
+          <div class="tli">
+            <div class="tldot" style="background:var(--bronze)"></div>
+            <div class="tlstep">STEP 5</div>
+            <div class="tltitle">Uncertainty &amp; Conservativeness Adjustment</div>
+            <div class="tlbody">
+              Source-specific uncertainty assessments:<br>
+              &bull; Tyre sensor pressure accuracy: &plusmn;0.5 PSI (calibration protocol, outlier removal)<br>
+              &bull; Fuel estimation model (Priority 2, no OBD): &plusmn;8&ndash;12% vs direct (Priority 1 OBD used where available)<br>
+              &bull; Retreading EF: &plusmn;15% (LCA range) &mdash; 40% conservative discount applied<br>
+              &bull; Route segment classification: &plusmn;5% (GPS validated against G7 road type DB)
+            </div>
+            <div class="tlformula">
+              ER_final = ER_calculated &times; (1 &minus; 0.05)<br>
+              5% blanket conservative adjustment applied on top of all source-specific discounts.<br>
+              ER_final = credits submitted to Beijing Green Exchange for CCER issuance.
+            </div>
+          </div>
+
+          <div class="tli">
+            <div class="tldot" style="background:var(--green)"></div>
+            <div class="tlstep">STEP 6</div>
+            <div class="tltitle">Dual Verification Protocol &mdash; Structural Independence</div>
+            <div class="tlbody">
+              <strong>Bureau Veritas (Carbon Credit Verification):</strong> CCER methodology adherence, ER calculation, additionality, credit issuance. 1 of 5 MEE-accredited CCER v2 verifiers. Engaged by fleet operator, not Michelin.<br><br>
+              <strong>SGS &mdash; CONFIRMED (Data &amp; MRV Verification):</strong> Sensor data integrity, Carbon Ledger audit, monitoring protocol compliance. 93,000 employees &middot; 2,600 labs &middot; CNAS + CMA accredited &middot; Largest HDL auditor in China.<br><br>
+              <strong>Why structural independence matters:</strong> Michelin cannot alter Carbon Ledger data (SHA-256 cryptographic immutability). Neither verifier is engaged by Michelin. Conflict of interest is architecturally impossible, not just contractually avoided.
+            </div>
+          </div>
+
+          <div class="tli">
+            <div class="tldot" style="background:var(--green)"></div>
+            <div class="tlstep">STEP 7</div>
+            <div class="tltitle">Credit Issuance &amp; Ownership Structure</div>
+            <div class="tlbody">
+              &bull; <strong>Credit unit:</strong> 1 CCER = 1 tonne CO&#8322;e reduced (verified).<br>
+              &bull; <strong>Issuance frequency:</strong> Annual (calendar year). Triggered by dual verification sign-off.<br>
+              &bull; <strong>Ownership:</strong> Fleet operator earns 100% of CCER credits.<br>
+              &bull; <strong>Michelin fee:</strong> 8&ndash;12% methodology fee at point of trade only. Zero upfront.<br>
+              &bull; <strong>Trading platform:</strong> Beijing Green Exchange (BGE) &mdash; API-integrated with Carbon Ledger.<br>
+              &bull; <strong>Open standard commitment:</strong> Methodology published at Phase 2 start. Jointly owned by GRI, Michelin, and Phase 2 co-developer partners. Any logistics operator globally can adopt it.
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <!-- CCER sensitivity -->
+      <div class="card">
+        <div class="card-h"><span class="card-t">CCER Price Sensitivity &mdash; Phase 3 (300K veh)</span><span class="badge b-warn">Year 3+ conditional</span></div>
+        <div class="card-b">
+          <table class="dt">
+            <thead><tr><th>CCER Price</th><th class="tn">Operator credit</th><th class="tn">Michelin 10% fee</th><th>Scenario</th></tr></thead>
+            <tbody>
+              <tr><td>RMB 80 ($9.70/t)</td><td class="tn">$83/veh/yr</td><td class="tn tc-green">$24,841K</td><td>Conservative</td></tr>
+              <tr style="background:var(--red-d)">
+                <td style="font-weight:600">RMB 93 ($11.27/t)</td>
+                <td class="tn" style="font-weight:600">$96/veh/yr</td>
+                <td class="tn tc-red" style="font-weight:600">$28,877K</td>
+                <td style="color:var(--red);font-weight:600">Base case</td>
+              </tr>
+              <tr><td>RMB 106 ($12.85/t)</td><td class="tn">$110/veh/yr</td><td class="tn tc-green">$32,914K</td><td>Optimistic</td></tr>
+              <tr><td>RMB 120 ($14.55/t)</td><td class="tn">$124/veh/yr</td><td class="tn tc-green">$37,261K</td><td>Bull (CEA 2025)</td></tr>
+            </tbody>
+          </table>
+          <div class="notebox" style="margin-top:10px">MEE has NOT yet approved a logistics fleet CCER methodology. All CCER = $0 in Years 1&ndash;3. CFI is creating this market, not entering one that exists.</div>
+        </div>
+      </div>
+
+      <!-- ESG value dashboard -->
+      <div class="card">
+        <div class="card-h"><span class="card-t">ESG Value Dashboard (ESG tab v150426)</span></div>
+        <div class="card-b">
+          <div class="statlist">
+            <div class="statrow"><span class="statlbl">CO&#8322; reduced / vehicle / year</span><span class="statval tc-green">8.54 tCO&#8322;</span></div>
+            <div class="statrow"><span class="statlbl">Fuel saving (4% pressure optimisation)</span><span class="statval tc-green">2,800 L/yr</span></div>
+            <div class="statrow"><span class="statlbl">CO&#8322; from fuel saving</span><span class="statval tc-green">7.50 tCO&#8322;/veh/yr</span></div>
+            <div class="statrow"><span class="statlbl">CO&#8322; from retreading (Michelin REMIX 2)</span><span class="statval tc-green">1.04 tCO&#8322;/veh/yr</span></div>
+            <div class="statrow"><span class="statlbl">Tyres retreaded / vehicle / yr</span><span class="statval">9 tyres</span></div>
+            <div class="statrow"><span class="statlbl">Oil saved per retread (rubber recovery)</span><span class="statval tc-green">70 L</span></div>
+            <div class="statrow"><span class="statlbl">Phase 3 tyres diverted from landfill</span><span class="statval tc-green">2.7M tyres/yr</span></div>
+            <div class="statrow"><span class="statlbl">Phase 3 equivalent cars removed</span><span class="statval tc-green">1.2M cars/yr</span></div>
+            <div class="statrow"><span class="statlbl">Operator net saving Year 1</span><span class="statval tc-green">$3,279/veh (3.9&times;)</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Additionality tests -->
+      <div class="card">
+        <div class="card-h"><span class="card-t">Additionality &mdash; Three Tests Met</span><span class="badge b-ok">All three confirmed</span></div>
+        <div class="card-b">
+          <table class="dt">
+            <thead><tr><th>Test</th><th>CFI Response</th><th>Verdict</th></tr></thead>
+            <tbody>
+              <tr><td style="font-weight:600">Regulatory test</td><td>No mandate exists for predictive tyre ESG compliance in China HDL sector</td><td><span class="badge b-ok">PASSED</span></td></tr>
+              <tr><td style="font-weight:600">Financial test</td><td>Investment not viable without CFI revenue model (subscription + retreading margin)</td><td><span class="badge b-ok">PASSED</span></td></tr>
+              <tr><td style="font-weight:600">Common practice test</td><td>Under 5% retreading rate (CRIA 2025) confirms non-standard behaviour</td><td><span class="badge b-ok">PASSED</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ PAGE: ESG STAR ══════════════ -->
+<section class="page" id="pg-esgstar">
+  <div class="ph">
+    <div>
+      <div class="ph-title">ESG <em>Star Accreditation</em></div>
+      <div class="ph-sub">Michelin Guide architecture &middot; Three-tier certification &middot; Bureau Veritas + SGS dual verification &middot; Blockchain-immutable</div>
+    </div>
+  </div>
+
+  <div class="g3">
+    <div class="kpi bronze"><div class="kl">&#9733; Bronze Tier</div><div class="kv">&le;52 gCO&#8322;/vkm</div><div class="ks">15% reduction from China HDL avg (61)</div><div class="kd note">Achievable Year 1 &middot; Retreading &ge;40%</div></div>
+    <div class="kpi" style="--accent:var(--t3)"><div class="kl" style="color:var(--t2)">&#9733;&#9733; Silver Tier</div><div class="kv">&le;42 gCO&#8322;/vkm</div><div class="ks">EU mandatory standard &middot; 2&ndash;3 full retread cycles</div><div class="kd note">Retreading &ge;65%</div></div>
+    <div class="kpi green"><div class="kl">&#9733;&#9733;&#9733; Green Tier</div><div class="kv">&le;35 gCO&#8322;/vkm</div><div class="ks">Michelin 2030 Scope 3 target &middot; Best-in-class</div><div class="kd up">Retreading &ge;85%</div></div>
+  </div>
+
+  <div class="g2">
+    <div class="card">
+      <div class="card-h"><span class="card-t">ESG Star Register &mdash; Phase 1</span><span class="badge b-ok">Blockchain-immutable</span></div>
+      <div class="card-b">
+        <table class="dt">
+          <thead><tr><th>Operator</th><th>Vehicles</th><th>Intensity</th><th>Tier</th><th>Verified By</th><th>Issued</th><th>Next Review</th></tr></thead>
+          <tbody>
+            <tr>
+              <td style="font-weight:600">SF Express (pilot)</td>
+              <td class="tn">500</td>
+              <td class="tn tc-green">48.3 gCO&#8322;/vkm</td>
+              <td><span class="badge b-bronze">&#9733; Bronze</span></td>
+              <td style="font-size:10px;color:var(--t2)">Bureau Veritas + SGS</td>
+              <td style="font-family:var(--mono);font-size:10px">Mar 2026</td>
+              <td style="font-family:var(--mono);font-size:10px;color:var(--t3)">Mar 2027</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="notebox" style="margin-top:12px">
+          <strong>Structural independence:</strong> Bureau Veritas verifies CCER credits. SGS verifies data and MRV. Neither verifier is engaged by Michelin. Conflict of interest is architecturally impossible &mdash; Michelin cannot alter Carbon Ledger data due to SHA-256 cryptographic immutability.
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-h"><span class="card-t">Verification Architecture</span><span class="card-sub">Step 6 of 7-step methodology</span></div>
+      <div class="card-b" style="display:flex;flex-direction:column;gap:10px">
+        <div style="background:var(--red-d);border:1px solid var(--red-b);border-radius:6px;padding:12px">
+          <div style="font-size:10px;font-weight:600;color:var(--red);margin-bottom:5px;letter-spacing:.5px">BUREAU VERITAS &mdash; Carbon Credit Verification</div>
+          <div style="font-size:11px;color:var(--t2);line-height:1.5">CCER methodology adherence &middot; ER calculation &middot; additionality &middot; credit issuance.<br>1 of 5 MEE-accredited CCER v2 verifiers. Engaged by fleet operator, not Michelin.</div>
+        </div>
+        <div style="background:var(--blue-d);border:1px solid var(--blue-b);border-radius:6px;padding:12px">
+          <div style="font-size:10px;font-weight:600;color:var(--blue);margin-bottom:5px;letter-spacing:.5px">SGS &mdash; Data &amp; MRV Verification (CONFIRMED)</div>
+          <div style="font-size:11px;color:var(--t2);line-height:1.5">Sensor data integrity &middot; Carbon Ledger audit &middot; monitoring protocol.<br>93,000 employees &middot; 2,600 labs &middot; CNAS + CMA &middot; Largest HDL auditor China.</div>
+        </div>
+        <div style="background:var(--green-d);border:1px solid var(--green-b);border-radius:6px;padding:12px">
+          <div style="font-size:10px;font-weight:600;color:var(--green);margin-bottom:5px;letter-spacing:.5px">STRUCTURAL INDEPENDENCE GUARANTEE</div>
+          <div style="font-size:11px;color:var(--t2);line-height:1.5">Michelin cannot alter Carbon Ledger data (SHA-256 cryptographic immutability). Neither verifier engaged by Michelin. Structurally impossible, not just contractually avoided.</div>
+        </div>
+        <div style="background:var(--bg3);border-radius:6px;padding:12px">
+          <div style="font-size:9px;font-weight:600;color:var(--t2);margin-bottom:8px;letter-spacing:.9px;text-transform:uppercase">Regulatory Alignment</div>
+          <div class="statlist">
+            <div class="statrow"><span class="statlbl">GRI develops methodology</span><span class="badge b-ok">Active</span></div>
+            <div class="statrow"><span class="statlbl">MEE approves methodology</span><span class="badge b-warn">Submitted</span></div>
+            <div class="statrow"><span class="statlbl">MIIT &mdash; policy beneficiary</span><span class="badge b-blue">15th FYP aligned</span></div>
+            <div class="statrow"><span class="statlbl">CSRC disclosure auto-generated</span><span class="badge b-ok">Month 1</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+  </div><!-- end .content -->
+</div><!-- end .main -->
+
+<script>
+/* DATA */
+const PIPELINE = [
+  {n:'SF Express (full HDL)',s:'Long-Haul HDL',f:'15,000-20,000',r:'$27.2M ARR',u:'HIGH — CSRC 2026',st:'Phase 1 pilot live',v:'Mentor introduction'},
+  {n:'ZTO Express',s:'Long-Haul HDL',f:'~8,000',r:'$14.5M ARR',u:'HIGH — CSRC 2026',st:'Outreach Q3 2026',v:'Post-Phase 1 referral'},
+  {n:'YTO Express',s:'Long-Haul HDL',f:'~6,500',r:'$11.8M ARR',u:'HIGH — CSRC 2026',st:'Outreach Q3 2026',v:'Industry association'},
+  {n:'Deppon Logistics',s:'Long-Haul HDL',f:'~5,000',r:'$9.1M ARR',u:'MED',st:'Pipeline Q4 2026',v:'Michelin tyre relationship'},
+  {n:'S.F. Freight (cold chain)',s:'Cold Chain/Pharma',f:'~2,000',r:'$9.6M ARR',u:'HIGH — Pharma SLA',st:'Cold chain pilot target',v:'SF Express referral'},
+  {n:'BYD Commercial Fleet',s:'EV Commercial',f:'~3,000',r:'$6.6M ARR',u:'MED',st:'Exploratory Q1 2027',v:'EV tyre partnership'},
+];
+const RETREAD = [
+  {v:'SF-HDL-0047',w:94,e:'3 days',c:'Cycle 2',r:'$152',s:'URGENT'},
+  {v:'SF-HDL-0112',w:91,e:'5 days',c:'Cycle 1',r:'$152',s:'URGENT'},
+  {v:'SF-HDL-0283',w:87,e:'9 days',c:'Cycle 3',r:'$152',s:'DUE SOON'},
+  {v:'SF-HDL-0391',w:83,e:'14 days',c:'Cycle 1',r:'$152',s:'DUE SOON'},
+  {v:'SF-HDL-0156',w:76,e:'21 days',c:'Cycle 2',r:'$152',s:'SCHEDULED'},
+  {v:'SF-HDL-0478',w:62,e:'38 days',c:'Cycle 1',r:'$152',s:'MONITOR'},
+];
+
+/* RENDERS */
+function renderPipeline() {
+  const tb = document.getElementById('pipelineBody');
+  if (!tb) return;
+  const uc = {'HIGH — CSRC 2026':'var(--red)','HIGH — Pharma SLA':'var(--red)'};
+  tb.innerHTML = PIPELINE.map(p => `
+    <tr>
+      <td style="font-weight:600">${p.n}</td>
+      <td>${p.s}</td>
+      <td class="tn">${p.f}</td>
+      <td class="tn tc-red">${p.r}</td>
+      <td style="font-size:10px;font-weight:600;color:${uc[p.u]||'var(--gold)'}">${p.u}</td>
+      <td style="font-size:10px;color:var(--t2)">${p.st}</td>
+      <td style="font-size:10px;color:var(--blue)">${p.v}</td>
+    </tr>`).join('');
+}
+
+function renderRetread() {
+  const tb = document.getElementById('retreadBody');
+  if (!tb) return;
+  const sc = {URGENT:'var(--red)','DUE SOON':'var(--gold)',SCHEDULED:'var(--green)',MONITOR:'var(--t2)'};
+  tb.innerHTML = RETREAD.map(r => {
+    const wc = r.w > 90 ? 'var(--red)' : r.w > 80 ? 'var(--gold)' : 'var(--green)';
+    const ec = r.e.startsWith('3') || r.e.startsWith('5') ? 'var(--red)' : 'var(--t1)';
+    return `<tr>
+      <td style="font-family:var(--mono);font-size:10px">${r.v}</td>
+      <td>SF Express</td>
+      <td class="tn" style="color:${wc}">${r.w}%</td>
+      <td style="color:${ec};font-weight:${ec==='var(--red)'?'600':'400'}">${r.e}</td>
+      <td>${r.c}</td>
+      <td class="tn tc-bronze">${r.r}</td>
+      <td style="font-size:9px;font-weight:600;color:${sc[r.s]||'var(--t2)'}">${r.s}</td>
+    </tr>`;
+  }).join('');
+}
+
+/* NAVIGATION */
+const PAGE_IDS = ['overview','revenue','operators','retreading','methodology','esgstar'];
+
+function go(pageId, clickedEl) {
+  // Hide all pages
+  PAGE_IDS.forEach(id => {
+    const el = document.getElementById('pg-' + id);
+    if (el) el.classList.remove('active');
+  });
+  // Show target page
+  const target = document.getElementById('pg-' + pageId);
+  if (target) target.classList.add('active');
+  // Update nav
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  if (clickedEl) {
+    clickedEl.classList.add('active');
+  } else {
+    document.querySelectorAll('.nav-item').forEach(n => {
+      if (n.getAttribute('onclick') && n.getAttribute('onclick').includes(pageId)) {
+        n.classList.add('active');
+      }
+    });
+  }
+}
+
+/* INIT */
+document.addEventListener('DOMContentLoaded', function() {
+  renderPipeline();
+  renderRetread();
+});
+</script>
+</body>
+</html>

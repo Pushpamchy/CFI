@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<!--
+  ════════════════════════════════════════════════════════════════
+  CARBON FLEET INTELLIGENCE (CFI) — Michelin ESG Star Leaderboard
+  Version 3.0 · INNOVATEChina 2026 · PROTOTYPE
+
+  Design concept: Michelin Guide Red Book aesthetic
+    — White page default (as the physical guide reads)
+    — Deep red (#C8102E) for all stars, headers, accents
+    — Black editorial typography on white
+    — Dark mode as secondary toggle option
+
+  Michelin Guide palette:
+    #C8102E  Michelin Guide Red   — stars, headers, primary accent
+    #1A1A1A  Editorial Black      — body text on white
+    #FFFFFF  Guide White          — page background (default)
+    #27509B  Michelin Blue        — methodology panel accent
+
+  Tiers:  ★ Bronze · ★★ Silver · ★★★ Green (highest)
+  Data:   All hard-coded. Production → CFI scoring engine API.
+  Fonts:  DM Sans (UI) · DM Mono (numbers) · Fraunces (headings)
+  ════════════════════════════════════════════════════════════════
+-->
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CFI — Michelin ESG Star Leaderboard · China Commercial Logistics</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Fraunces:ital,wght@0,300;0,600;1,300&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ════════════════════════════════════════════════════════════
+       MICHELIN GUIDE CONSTANTS
+       These never change between themes — they are the brand.
+    ════════════════════════════════════════════════════════════ */
+    :root {
+      /* Core Michelin brand */
+      --michelin-red:   #C8102E;
+      --michelin-blue:  #27509B;
+      --mred-dim:       rgba(200,16,46,0.08);
+      --mred-border:    rgba(200,16,46,0.20);
+      --mblu-dim:       rgba(39,80,155,0.08);
+      --mblu-border:    rgba(39,80,155,0.22);
+
+      /* Tier colours */
+      --bronze:         #B5621A;
+      --bronze-dim:     rgba(181,98,26,0.09);
+      --bronze-border:  rgba(181,98,26,0.22);
+      --silver-c:       #6B7280;
+      --silver-dim:     rgba(107,114,128,0.09);
+      --silver-border:  rgba(107,114,128,0.22);
+      --green-c:        #16A34A;
+      --green-dim:      rgba(22,163,74,0.09);
+      --green-border:   rgba(22,163,74,0.22);
+
+      /* Status */
+      --ok:    #16A34A;
+      --ok-dim: rgba(22,163,74,0.09);
+      --crit:  #DC2626;
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       LIGHT THEME — Michelin Guide White Page (DEFAULT)
+       Mirrors the physical Red Guide: white pages, red stars,
+       black editorial type. Clean, luxurious, instantly recognisable.
+    ════════════════════════════════════════════════════════════ */
+    [data-theme="light"] {
+      /* Surfaces */
+      --bg:        #F5F5F0;   /* slightly warm off-white — guide paper feel */
+      --surface-1: #FFFFFF;   /* pure white cards and panels */
+      --surface-2: #FFFFFF;
+      --surface-3: #F8F8F6;   /* lightest tint for table heads */
+      --surface-4: #EDEDE8;   /* hover states */
+
+      /* Borders — very subtle on white */
+      --border:    rgba(0,0,0,0.07);
+      --border-2:  rgba(0,0,0,0.13);
+
+      /* Typography — editorial black */
+      --text-1:    #1A1A1A;   /* headings and primary text */
+      --text-2:    #5C5C5C;   /* secondary / labels */
+      --text-3:    #A0A0A0;   /* dimmed / disabled */
+
+      /* Stars are RED in the physical Michelin Guide — not gold */
+      --star-col:  #C8102E;
+
+      /* Tier text colours adjusted for white backgrounds */
+      --bronze-t:  #9A4E10;
+      --silver-t:  #5A6270;
+      --green-t:   #14532D;
+
+      /* Right panel — Michelin Blue tint */
+      --panel-bg:  rgba(39,80,155,0.04);
+      --panel-bdr: rgba(39,80,155,0.16);
+
+      /* Theme button text */
+      --toggle-label: "🌙 Dark Mode";
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       DARK THEME — secondary option via toggle
+    ════════════════════════════════════════════════════════════ */
+    [data-theme="dark"] {
+      --bg:        #0A0A0A;
+      --surface-1: #111111;
+      --surface-2: #181818;
+      --surface-3: #202020;
+      --surface-4: #2A2A2A;
+
+      --border:    rgba(255,255,255,0.06);
+      --border-2:  rgba(255,255,255,0.11);
+
+      --text-1:    #F0F0F0;
+      --text-2:    #888888;
+      --text-3:    #444444;
+
+      /* In dark mode stars glow Michelin Red with slight warmth */
+      --star-col:  #E8294A;
+
+      --bronze-t:  #C47A3A;
+      --silver-t:  #9CA3AF;
+      --green-t:   #22C55E;
+
+      --panel-bg:  rgba(39,80,155,0.10);
+      --panel-bdr: rgba(39,80,155,0.25);
+
+      --toggle-label: "☀️ Light Mode";
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       RESET & BASE
+    ════════════════════════════════════════════════════════════ */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { font-size: 14px; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text-1);
+      min-height: 100vh;
+      line-height: 1.5;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--surface-1); }
+    ::-webkit-scrollbar-thumb { background: var(--surface-4); border-radius: 3px; }
+
+    /* ════════════════════════════════════════════════════════════
+       TOPBAR — always Michelin Guide Red regardless of theme.
+       This is the "red cover" of the guide.
+    ════════════════════════════════════════════════════════════ */
+    .topbar {
+      position: sticky; top: 0; z-index: 300;
+      height: 58px;
+      background: var(--michelin-red);
+      display: flex; align-items: center;
+      justify-content: space-between;
+      padding: 0 clamp(16px, 4vw, 44px);
+      gap: 12px;
+      /* Subtle shadow so white page below feels like a book opening */
+      box-shadow: 0 3px 20px rgba(200,16,46,0.40);
+    }
+
+    .logo { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+
+    .logo-mark {
+      width: 30px; height: 30px;
+      background: rgba(255,255,255,0.20);
+      border: 1px solid rgba(255,255,255,0.35);
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'DM Mono', monospace;
+      font-size: 11px; font-weight: 500; color: #fff;
+      letter-spacing: -0.5px;
+    }
+
+    .logo-text { font-size: 13px; font-weight: 600; color: #fff; }
+    .logo-sub  { font-size: 11px; font-weight: 400; color: rgba(255,255,255,0.68); }
+
+    /* Centre title in topbar — italic serif, guide style */
+    .topbar-title {
+      font-family: 'Fraunces', serif;
+      font-size: 14px; font-weight: 300; font-style: italic;
+      color: rgba(255,255,255,0.88);
+      letter-spacing: 0.02em; text-align: center;
+    }
+
+    .topbar-right {
+      display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+    }
+
+    .live-badge {
+      display: flex; align-items: center; gap: 6px;
+      font-family: 'DM Mono', monospace; font-size: 11px;
+      color: rgba(255,255,255,0.78);
+    }
+
+    /* Pulsing yellow dot — Michelin brand yellow as status indicator */
+    .live-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: #FCE500;
+      animation: blink 2s ease-in-out infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.35} }
+
+    /* Theme toggle — white ghost on red bar */
+    .theme-btn {
+      display: flex; align-items: center; gap: 5px;
+      padding: 5px 13px; border-radius: 6px;
+      background: rgba(255,255,255,0.16);
+      border: 1px solid rgba(255,255,255,0.28);
+      font-size: 11px; font-weight: 500; color: #fff;
+      cursor: pointer; font-family: 'DM Sans', sans-serif;
+      transition: background 0.15s; white-space: nowrap;
+    }
+    .theme-btn:hover { background: rgba(255,255,255,0.27); }
+
+    /* ════════════════════════════════════════════════════════════
+       HERO — the "opening page" of the guide
+       Light mode: crisp white with a bold red left rule
+       Dark mode:  rich dark with a red left rule
+    ════════════════════════════════════════════════════════════ */
+    .hero {
+      background: var(--surface-1);
+      border-bottom: 1px solid var(--border);
+      padding: clamp(28px,4vw,48px) clamp(16px,4vw,44px) clamp(24px,3vw,40px);
+      position: relative; overflow: hidden;
+    }
+
+    /* Michelin Guide red left rule — like the guide's editorial spine line */
+    .hero::before {
+      content: '';
+      position: absolute; left: 0; top: 0; bottom: 0; width: 5px;
+      background: var(--michelin-red);
+    }
+
+    /* Eyebrow tag — red on light, dimmed on dark */
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 4px 12px; border-radius: 3px;
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 0.10em; text-transform: uppercase;
+      font-family: 'DM Mono', monospace;
+      margin-bottom: 16px;
+
+      /* Light: red text on very light red bg — matches guide print style */
+      background: var(--mred-dim);
+      border: 1px solid var(--mred-border);
+      color: var(--michelin-red);
+    }
+
+    /* Stars in eyebrow — always Michelin Guide Red */
+    .eyebrow-stars { color: var(--michelin-red); letter-spacing: 2px; }
+
+    /* Main display heading — Fraunces serif, guide editorial weight */
+    .hero-title {
+      font-family: 'Fraunces', serif;
+      font-size: clamp(28px, 4vw, 42px);
+      font-weight: 300; line-height: 1.12;
+      margin-bottom: 12px;
+      color: var(--text-1);
+      max-width: 640px;
+    }
+
+    /* The italic red phrase — the most recognisable part */
+    .hero-title em { font-style: italic; color: var(--michelin-red); }
+
+    .hero-sub {
+      font-size: 13px; color: var(--text-2);
+      max-width: 590px; line-height: 1.68; margin-bottom: 28px;
+    }
+
+    /* Aggregate stats — editorial number display */
+    .hero-stats { display: flex; gap: clamp(28px,5vw,60px); flex-wrap: wrap; }
+
+    .stat-val {
+      font-family: 'DM Mono', monospace;
+      font-size: clamp(20px,3vw,28px);
+      font-weight: 500; line-height: 1; color: var(--text-1);
+    }
+
+    .stat-label { font-size: 10px; color: var(--text-2); margin-top: 4px; }
+
+    /* ════════════════════════════════════════════════════════════
+       FILTER BAR
+    ════════════════════════════════════════════════════════════ */
+    .filter-bar {
+      background: var(--surface-1);
+      border-bottom: 2px solid var(--michelin-red); /* red underline — guide motif */
+      padding: 14px clamp(16px,4vw,44px);
+      display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    }
+
+    .filter-label {
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 0.10em; text-transform: uppercase;
+      color: var(--text-3); margin-right: 4px;
+    }
+
+    /* Tier filter buttons */
+    .tier-btn {
+      display: flex; align-items: center; gap: 7px;
+      padding: 6px 15px; border-radius: 4px;
+      border: 1px solid var(--border-2);
+      cursor: pointer; font-size: 12px; font-weight: 600;
+      font-family: 'DM Sans', sans-serif;
+      background: var(--surface-3); color: var(--text-2);
+      transition: all 0.14s; white-space: nowrap;
+    }
+    .tier-btn:hover:not(.active) { background: var(--surface-4); color: var(--text-1); }
+
+    /* Active states */
+    .tier-btn.active.all-t    { background: var(--michelin-red); border-color: var(--michelin-red); color: #fff; }
+    .tier-btn.active.green-t  { background: var(--green-dim);   border-color: var(--green-border);  color: var(--green-t); }
+    .tier-btn.active.silver-t { background: var(--silver-dim);  border-color: var(--silver-border); color: var(--silver-t); }
+    .tier-btn.active.bronze-t { background: var(--bronze-dim);  border-color: var(--bronze-border); color: var(--bronze-t); }
+
+    .tier-count {
+      font-size: 10px; font-family: 'DM Mono', monospace; opacity: 0.60;
+    }
+
+    .filter-spacer { flex: 1; min-width: 12px; }
+
+    .filter-select {
+      padding: 6px 13px;
+      background: var(--surface-3); border: 1px solid var(--border-2);
+      border-radius: 4px; font-size: 11px; color: var(--text-2);
+      cursor: pointer; font-family: 'DM Sans', sans-serif;
+      transition: background 0.12s;
+    }
+    .filter-select:hover { background: var(--surface-4); color: var(--text-1); }
+
+    /* ════════════════════════════════════════════════════════════
+       MAIN LAYOUT
+    ════════════════════════════════════════════════════════════ */
+    .main-layout {
+      display: grid;
+      grid-template-columns: 1fr 296px;
+    }
+
+    @media (max-width: 1100px) {
+      .main-layout { grid-template-columns: 1fr; }
+      .right-panel { display: none; }
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       LEADERBOARD SECTION
+    ════════════════════════════════════════════════════════════ */
+    .lb-section {
+      padding: clamp(20px,3vw,32px) clamp(16px,4vw,44px);
+      border-right: 1px solid var(--border);
+    }
+
+    .section-bar {
+      display: flex; align-items: center;
+      justify-content: space-between; margin-bottom: 18px;
+      flex-wrap: wrap; gap: 8px;
+    }
+
+    .section-label {
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--michelin-red); /* red label — guide editorial style */
+    }
+
+    /* ── PODIUM (Top 3) ──────────────────────────────────── */
+    .podium {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px; margin-bottom: 28px; align-items: end;
+    }
+    @media (max-width: 680px) { .podium { grid-template-columns: 1fr; } }
+
+    .podium-card {
+      border-radius: 6px; padding: 20px;
+      border: 1px solid var(--border);
+      cursor: pointer; transition: transform 0.15s, box-shadow 0.15s;
+      background: var(--surface-1);
+      position: relative; overflow: hidden;
+    }
+    .podium-card:hover { transform: translateY(-3px); box-shadow: 0 8px 28px rgba(0,0,0,0.10); }
+
+    /* Top accent stripe — Michelin Red for all, varies in opacity per rank */
+    .podium-card::before {
+      content: ''; position: absolute;
+      top: 0; left: 0; right: 0; height: 4px;
+    }
+    .podium-card.r1::before { background: var(--michelin-red); }
+    .podium-card.r2::before { background: var(--silver-c); }
+    .podium-card.r3::before { background: var(--bronze); }
+
+    /* Elevate #1 card */
+    .podium-card.r1 { border-color: rgba(200,16,46,0.22); margin-bottom: -10px; }
+    .podium-card.r2 { border-color: var(--silver-border); }
+    .podium-card.r3 { border-color: var(--bronze-border); }
+
+    .p-rank {
+      font-family: 'DM Mono', monospace; font-size: 10px; font-weight: 600;
+      letter-spacing: 0.06em; margin-bottom: 10px;
+      color: var(--michelin-red);
+    }
+
+    .p-medal { font-size: 24px; margin-bottom: 8px; line-height: 1; }
+
+    /* RED STARS — this is the Michelin Guide. Stars are always red. */
+    .p-stars {
+      font-size: 18px; margin-bottom: 8px; line-height: 1;
+      color: var(--michelin-red); letter-spacing: 2px;
+    }
+
+    .p-name { font-size: 13px; font-weight: 600; margin-bottom: 3px; line-height: 1.3; color: var(--text-1); }
+    .p-type { font-size: 10px; color: var(--text-2); margin-bottom: 12px; }
+
+    .p-co2 {
+      font-family: 'DM Mono', monospace; font-size: 26px;
+      font-weight: 500; line-height: 1; margin-bottom: 2px;
+    }
+    .r1 .p-co2 { color: var(--michelin-red); }
+    .r2 .p-co2 { color: var(--silver-t); }
+    .r3 .p-co2 { color: var(--bronze-t); }
+
+    .p-unit { font-size: 9px; color: var(--text-3); font-family: 'DM Mono', monospace; margin-bottom: 12px; }
+
+    /* Verified badge — red border, red text on white */
+    .p-verified {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: var(--mred-dim);
+      border: 1px solid var(--mred-border);
+      border-radius: 3px; padding: 3px 9px;
+      font-size: 9px; font-weight: 700;
+      color: var(--michelin-red); letter-spacing: 0.06em;
+      font-family: 'DM Mono', monospace; margin-bottom: 12px;
+    }
+
+    .p-metrics {
+      display: flex; justify-content: space-between;
+      padding-top: 11px; border-top: 1px solid var(--border);
+    }
+    .p-metric { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+    .p-metric-val { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-1); }
+    .p-metric-lbl { font-size: 9px; color: var(--text-3); }
+
+    /* ── FLEET DETAIL PANEL ── */
+    .detail-panel {
+      background: var(--surface-1);
+      border: 1px solid var(--border-2);
+      border-left: 4px solid var(--michelin-red);
+      border-radius: 6px; padding: 18px;
+      margin-bottom: 18px;
+      display: none;
+      animation: slideIn 0.2s ease;
+    }
+    .detail-panel.open { display: block; }
+    @keyframes slideIn { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
+
+    .detail-kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill,minmax(140px,1fr));
+      gap: 10px; margin-top: 12px;
+    }
+
+    .detail-kpi {
+      background: var(--surface-3); border: 1px solid var(--border);
+      border-radius: 5px; padding: 11px;
+    }
+    .dkpi-label { font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-2); margin-bottom: 4px; }
+    .dkpi-val   { font-family: 'DM Mono', monospace; font-size: 14px; font-weight: 500; }
+
+    /* ── FULL LEADERBOARD TABLE ── */
+    .lb-table-wrap { overflow-x: auto; }
+
+    .lb-table { width: 100%; border-collapse: collapse; min-width: 680px; }
+
+    .lb-table th {
+      font-size: 9px; font-weight: 700;
+      letter-spacing: 0.10em; text-transform: uppercase;
+      color: var(--michelin-red); /* red column headers — guide editorial */
+      padding: 9px 12px;
+      background: var(--surface-3);
+      border-bottom: 2px solid var(--michelin-red); /* red underline on thead */
+      text-align: left; white-space: nowrap;
+    }
+
+    .lb-table td {
+      font-size: 12px; padding: 11px 12px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle; color: var(--text-1);
+    }
+    .lb-table tr:last-child td  { border-bottom: none; }
+    .lb-table tbody tr          { transition: background 0.12s; cursor: pointer; }
+    .lb-table tbody tr:hover    { background: var(--surface-3); }
+
+    /* "Your Fleet" highlighted row */
+    .lb-table tbody tr.highlighted    { background: rgba(200,16,46,0.04); }
+    .lb-table tbody tr.highlighted td { color: var(--michelin-red); font-weight: 500; }
+
+    /* Rank number */
+    .rank-num {
+      font-family: 'DM Mono', monospace; font-size: 15px;
+      font-weight: 500; color: var(--text-2);
+    }
+
+    /* Rank change arrows */
+    .chg-up   { color: var(--ok);   font-family:'DM Mono',monospace; font-size:10px; }
+    .chg-down { color: var(--crit); font-family:'DM Mono',monospace; font-size:10px; }
+    .chg-same { color: var(--text-3);font-family:'DM Mono',monospace; font-size:10px; }
+
+    .co-name { font-size: 12.5px; font-weight: 600; color: var(--text-1); }
+    .co-sub  { font-size: 10px; color: var(--text-2); margin-top: 1px; }
+
+    /* ── TIER STAR BADGES — RED stars on white, matching the guide ── */
+    .star-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 3px 9px; border-radius: 3px;
+      font-size: 10px; font-weight: 700;
+      font-family: 'DM Mono', monospace; white-space: nowrap;
+      letter-spacing: 0.04em;
+    }
+
+    /* Green tier — Michelin Guide Red stars (the highest honour) */
+    .star-green {
+      background: var(--mred-dim);
+      border: 1px solid var(--mred-border);
+      color: var(--michelin-red);
+    }
+
+    .star-silver {
+      background: var(--silver-dim);
+      border: 1px solid var(--silver-border);
+      color: var(--silver-t);
+    }
+
+    .star-bronze {
+      background: var(--bronze-dim);
+      border: 1px solid var(--bronze-border);
+      color: var(--bronze-t);
+    }
+
+    .star-prog {
+      background: var(--surface-3);
+      border: 1px solid var(--border);
+      color: var(--text-3);
+    }
+
+    .empty-state { text-align: center; padding: 48px 0; color: var(--text-2); font-size: 13px; }
+
+    /* ════════════════════════════════════════════════════════════
+       RIGHT PANEL — Michelin Blue methodology column
+    ════════════════════════════════════════════════════════════ */
+    .right-panel {
+      padding: clamp(20px,3vw,28px) clamp(14px,2vw,22px);
+      display: flex; flex-direction: column; gap: 16px;
+      background: var(--panel-bg);
+      border-left: 1px solid var(--panel-bdr);
+    }
+
+    .panel-card {
+      background: var(--surface-1);
+      border: 1px solid var(--border);
+      border-radius: 6px; overflow: hidden;
+    }
+
+    /* Panel card headers — Michelin Red background */
+    .panel-card-hd {
+      padding: 11px 15px;
+      background: var(--michelin-red);
+      color: #fff;
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 0.10em; text-transform: uppercase;
+    }
+
+    .panel-body { padding: 14px; }
+
+    /* Methodology rows */
+    .meth-row {
+      display: flex; align-items: flex-start; gap: 9px;
+      padding: 9px 0; border-bottom: 1px solid var(--border);
+    }
+    .meth-row:last-child { border-bottom: none; }
+    .meth-num  { font-family:'DM Mono',monospace; font-size:10px; color:var(--michelin-red); width:14px; flex-shrink:0; padding-top:1px; }
+    .meth-text { font-size:11px; color:var(--text-2); line-height:1.4; }
+    .meth-pct  { margin-left:auto; font-family:'DM Mono',monospace; font-size:10px; color:var(--michelin-blue); flex-shrink:0; }
+
+    /* Threshold rows */
+    .thresh-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 8px 0; border-bottom: 1px solid var(--border); font-size:11px;
+    }
+    .thresh-row:last-child { border-bottom: none; }
+    .thresh-label { color: var(--text-2); display:flex; align-items:center; gap:6px; }
+    .thresh-val   { font-family:'DM Mono',monospace; font-size:10px; padding:2px 7px; border-radius:3px; }
+    .tv-green  { background:var(--green-dim);   color:var(--green-t); }
+    .tv-silver { background:var(--silver-dim);  color:var(--silver-t); }
+    .tv-bronze { background:var(--bronze-dim);  color:var(--bronze-t); }
+    .tv-red    { background:var(--mred-dim);    color:var(--michelin-red); }
+    .tv-ok     { background:var(--ok-dim);      color:var(--ok); }
+
+    /* Independence checklist */
+    .ind-row {
+      display:flex; gap:9px; padding:8px 0;
+      border-bottom:1px solid var(--border); align-items:flex-start;
+    }
+    .ind-row:last-child { border-bottom: none; }
+    .ind-check {
+      width:15px; height:15px; border-radius:50%;
+      background:var(--ok-dim); border:1px solid rgba(22,163,74,0.22);
+      display:flex; align-items:center; justify-content:center;
+      font-size:8px; color:var(--ok); flex-shrink:0; margin-top:1px;
+    }
+    .ind-text { font-size:11px; color:var(--text-2); line-height:1.4; }
+
+    /* Co-developed box — Michelin Blue accent */
+    .codeved-box {
+      margin-top:12px; padding:10px;
+      background: var(--mblu-dim);
+      border: 1px solid var(--mblu-border);
+      border-radius: 5px;
+    }
+    .codeved-label { font-size:9px; font-weight:700; letter-spacing:0.09em; text-transform:uppercase; color:var(--michelin-blue); margin-bottom:3px; }
+    .codeved-text  { font-size:11px; color:var(--text-2); }
+
+    /* ════════════════════════════════════════════════════════════
+       FOOTER — Michelin Red bar (the guide back cover)
+    ════════════════════════════════════════════════════════════ */
+    .footer-bar {
+      display:flex; align-items:center; justify-content:space-between;
+      flex-wrap:wrap; gap:8px;
+      padding:11px clamp(16px,4vw,44px);
+      background: var(--michelin-red);
+      font-size:10px; color:rgba(255,255,255,0.65);
+      font-family:'DM Mono',monospace;
+    }
+
+    .proto-tag {
+      background:rgba(255,255,255,0.18); color:#fff;
+      border:1px solid rgba(255,255,255,0.32);
+      padding:2px 7px; border-radius:3px;
+      font-size:9px; font-weight:700; letter-spacing:0.07em;
+      margin-right:8px;
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       UTILITY
+    ════════════════════════════════════════════════════════════ */
+    .flex-row     { display:flex; align-items:center; gap:8px; }
+    .flex-between { display:flex; align-items:center; justify-content:space-between; }
+    .divider      { height:1px; background:var(--border); margin:10px 0; }
+    .mono         { font-family:'DM Mono',monospace; }
+    .td-num       { font-family:'DM Mono',monospace; font-size:11px; }
+    .col-red   { color:var(--michelin-red); }
+    .col-green { color:var(--green-t); }
+    .col-silver{ color:var(--silver-t); }
+    .col-bronze{ color:var(--bronze-t); }
+    .col-ok    { color:var(--ok); }
+    .col-sec   { color:var(--text-2); }
+    .col-dim   { color:var(--text-3); }
+    .col-blue  { color:var(--michelin-blue); }
+  </style>
+</head>
+
+<body>
+
+<!-- ════════════════════════════════════════════════════════════
+     TOPBAR — Michelin Red cover bar, always
+════════════════════════════════════════════════════════════ -->
+<header class="topbar">
+
+  <div class="logo">
+    <div class="logo-mark">CFI</div>
+    <div>
+      <span class="logo-text">Carbon Fleet Intelligence</span>
+      <span class="logo-sub"> by Michelin</span>
+    </div>
+  </div>
+
+  <div class="topbar-title">
+    Michelin ESG Star — China Commercial Logistics Leaderboard
+  </div>
+
+  <div class="topbar-right">
+    <div class="live-badge">
+      <div class="live-dot"></div>
+      <span>Updated: Apr 2026</span>
+    </div>
+    <span style="font-size:11px;color:rgba(255,255,255,0.68);font-family:'DM Mono',monospace">
+      Q2 2026 · 312 Certified Fleets
+    </span>
+    <button class="theme-btn" id="themeBtn" onclick="toggleTheme()">🌙 Dark Mode</button>
+  </div>
+
+</header>
+
+<!-- ════════════════════════════════════════════════════════════
+     HERO — white page with red left rule
+════════════════════════════════════════════════════════════ -->
+<section class="hero">
+
+  <div class="hero-eyebrow">
+    <span class="eyebrow-stars">★ ★ ★</span>
+    Michelin ESG Star Accreditation · China's First Verified Fleet Carbon Standard
+  </div>
+
+  <h1 class="hero-title">
+    The only fleet sustainability rating<br>built from <em>inside the tyre</em>
+  </h1>
+
+  <p class="hero-sub">
+    Sensor-verified. Blockchain-immutable. GRI 305/306 aligned.
+    Every rating on this leaderboard is earned through real carbon performance data —
+    not self-reported estimates or annual questionnaires.
+  </p>
+
+  <div class="hero-stats">
+    <div><div class="stat-val">312</div><div class="stat-label">Certified Fleets</div></div>
+    <div><div class="stat-val">47,800</div><div class="stat-label">Connected Vehicles</div></div>
+    <div><div class="stat-val">8,420t</div><div class="stat-label">CO₂ Avoided This Quarter</div></div>
+    <div><div class="stat-val">RMB 6.4M</div><div class="stat-label">CCER Credits Issued</div></div>
+    <div><div class="stat-val">28</div><div class="stat-label">Green Star Holders</div></div>
+  </div>
+
+</section>
+
+<!-- ════════════════════════════════════════════════════════════
+     FILTER BAR — red underline echoes guide's editorial rule
+════════════════════════════════════════════════════════════ -->
+<div class="filter-bar">
+  <span class="filter-label">Filter:</span>
+
+  <button class="tier-btn all-t active" onclick="filterTier('all',this)">
+    All Tiers <span class="tier-count">312 fleets</span>
+  </button>
+  <button class="tier-btn green-t" onclick="filterTier('green',this)">
+    ★★★ Green <span class="tier-count">28 · ≤35 gCO₂</span>
+  </button>
+  <button class="tier-btn silver-t" onclick="filterTier('silver',this)">
+    ★★ Silver <span class="tier-count">97 · ≤42 gCO₂</span>
+  </button>
+  <button class="tier-btn bronze-t" onclick="filterTier('bronze',this)">
+    ★ Bronze <span class="tier-count">187 · ≤55 gCO₂</span>
+  </button>
+
+  <div class="filter-spacer"></div>
+
+  <button class="filter-select" onclick="alert('Segment filter: Long-haul / Cold Chain / EV Fleet — production build')">Segment ▾</button>
+  <button class="filter-select" onclick="alert('Region filter: North / East / South / West China — production build')">Region ▾</button>
+  <button class="filter-select" onclick="alert('Fleet size filter: &lt;500 / 500–2000 / &gt;2000 — production build')">Fleet Size ▾</button>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════
+     MAIN LAYOUT
+════════════════════════════════════════════════════════════ -->
+<div class="main-layout">
+
+  <!-- ── LEADERBOARD ──────────────────────────────────────── -->
+  <div class="lb-section">
+
+    <!-- Top 3 podium -->
+    <div class="section-bar">
+      <span class="section-label">★ Top Performers · Q2 2026</span>
+      <span style="font-size:10px;color:var(--text-3);font-family:'DM Mono',monospace">
+        Ranked by ESG Score · Blockchain Verified
+      </span>
+    </div>
+
+    <div class="podium">
+
+      <!-- #2 — Silver, left, slightly lower -->
+      <div class="podium-card r2" onclick="openDetail('eastern')">
+        <div class="p-rank">★★ SILVER · #2</div>
+        <div class="p-medal">🥈</div>
+        <div class="p-name">Eastern Freight Alliance</div>
+        <div class="p-type">Long-haul logistics · 2,140 vehicles</div>
+        <div class="p-co2">38.4</div>
+        <div class="p-unit">gCO₂/vehicle·km</div>
+        <div class="p-metrics">
+          <div class="p-metric"><div class="p-metric-val">96.2</div><div class="p-metric-lbl">ESG Score</div></div>
+          <div class="p-metric"><div class="p-metric-val">3,210t</div><div class="p-metric-lbl">CO₂ Avoided</div></div>
+          <div class="p-metric"><div class="p-metric-val">RMB 1.2M</div><div class="p-metric-lbl">CCER Value</div></div>
+        </div>
+      </div>
+
+      <!-- #1 — Green, centre, elevated — RED stars, Michelin Guide style -->
+      <div class="podium-card r1" onclick="openDetail('polarstar')">
+        <div class="p-rank">★★★ GREEN · #1 LEADERBOARD</div>
+        <div class="p-medal">🥇</div>
+        <!-- Three red stars — exactly as the Michelin Guide prints them -->
+        <div class="p-stars">★ ★ ★</div>
+        <div class="p-name">PolarStar Cold Chain Group</div>
+        <div class="p-type">Cold chain / pharma · 890 vehicles</div>
+        <div class="p-co2">31.2</div>
+        <div class="p-unit">gCO₂/vehicle·km</div>
+        <div class="p-verified">✓ MICHELIN GREEN STAR · VERIFIED</div>
+        <div class="p-metrics">
+          <div class="p-metric"><div class="p-metric-val col-red">98.7</div><div class="p-metric-lbl">ESG Score</div></div>
+          <div class="p-metric"><div class="p-metric-val col-red">4,820t</div><div class="p-metric-lbl">CO₂ Avoided</div></div>
+          <div class="p-metric"><div class="p-metric-val col-red">RMB 1.9M</div><div class="p-metric-lbl">CCER Value</div></div>
+        </div>
+      </div>
+
+      <!-- #3 — Silver, right, slightly lower -->
+      <div class="podium-card r3" onclick="openDetail('blueline')">
+        <div class="p-rank">★★ SILVER · #3</div>
+        <div class="p-medal">🥉</div>
+        <div class="p-name">BlueLine Express Freight</div>
+        <div class="p-type">Long-haul logistics · 3,420 vehicles</div>
+        <div class="p-co2">39.1</div>
+        <div class="p-unit">gCO₂/vehicle·km</div>
+        <div class="p-metrics">
+          <div class="p-metric"><div class="p-metric-val">95.4</div><div class="p-metric-lbl">ESG Score</div></div>
+          <div class="p-metric"><div class="p-metric-val">5,140t</div><div class="p-metric-lbl">CO₂ Avoided</div></div>
+          <div class="p-metric"><div class="p-metric-val">RMB 2.0M</div><div class="p-metric-lbl">CCER Value</div></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Fleet detail panel — expands on row or podium click -->
+    <div class="detail-panel" id="detailPanel">
+      <div id="detailContent"></div>
+    </div>
+
+    <!-- Full rankings table -->
+    <div class="section-bar" style="margin-top:8px">
+      <span class="section-label">★ Full Rankings · All Certified Fleets</span>
+      <span id="rowCountLabel" style="font-size:10px;color:var(--text-3);font-family:'DM Mono',monospace"></span>
+    </div>
+
+    <div class="lb-table-wrap">
+      <table class="lb-table">
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>Chg</th>
+            <th>Fleet Operator</th>
+            <th>ESG Star</th>
+            <th>Carbon Intensity</th>
+            <th>ESG Score</th>
+            <th>CO₂ Avoided</th>
+            <th>CCER Credits</th>
+          </tr>
+        </thead>
+        <tbody id="lbBody"></tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <!-- ── RIGHT PANEL — Michelin Blue methodology ──────────── -->
+  <aside class="right-panel">
+
+    <div class="panel-card">
+      <div class="panel-card-hd">Scoring Methodology</div>
+      <div class="panel-body">
+        <div class="meth-row"><div class="meth-num">01</div><div class="meth-text">Carbon intensity per vehicle-km (sensor-verified, not estimated)</div><div class="meth-pct">35%</div></div>
+        <div class="meth-row"><div class="meth-num">02</div><div class="meth-text">Tyre lifecycle management and retreading rate</div><div class="meth-pct">25%</div></div>
+        <div class="meth-row"><div class="meth-num">03</div><div class="meth-text">Route optimisation and fuel efficiency improvement</div><div class="meth-pct">20%</div></div>
+        <div class="meth-row"><div class="meth-num">04</div><div class="meth-text">CCER credit generation and waste diversion</div><div class="meth-pct">20%</div></div>
+        <div class="codeved-box">
+          <div class="codeved-label">Co-developed with</div>
+          <div class="codeved-text">GRI International Standards · MIIT China · Annual independent audit</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel-card">
+      <div class="panel-card-hd">ESG Star Thresholds</div>
+      <div class="panel-body">
+        <div class="thresh-row"><div class="thresh-label"><span class="col-red">★★★</span> Green</div><div class="thresh-val tv-green">≤ 35 gCO₂/veh·km</div></div>
+        <div class="thresh-row"><div class="thresh-label"><span class="col-silver">★★</span> Silver</div><div class="thresh-val tv-silver">≤ 42 gCO₂/veh·km</div></div>
+        <div class="thresh-row"><div class="thresh-label"><span class="col-bronze">★</span> Bronze</div><div class="thresh-val tv-bronze">≤ 55 gCO₂/veh·km</div></div>
+        <div class="thresh-row"><div class="thresh-label">China Fleet Average</div><div class="thresh-val tv-red">61 gCO₂/veh·km</div></div>
+        <div class="thresh-row"><div class="thresh-label">GRI 305 Aligned</div><div class="thresh-val tv-ok">✓ Scope 1 + 3</div></div>
+        <div class="thresh-row"><div class="thresh-label">GRI 306 Aligned</div><div class="thresh-val tv-ok">✓ Waste / Tyres</div></div>
+      </div>
+    </div>
+
+    <div class="panel-card">
+      <div class="panel-card-hd">Independence &amp; Integrity</div>
+      <div class="panel-body">
+        <div class="ind-row"><div class="ind-check">✓</div><div class="ind-text">Methodology co-developed with GRI and MIIT China. Michelin is the brand — not the sole judge.</div></div>
+        <div class="ind-row"><div class="ind-check">✓</div><div class="ind-text">Annual verification by an internationally recognised independent auditor. No self-certification.</div></div>
+        <div class="ind-row"><div class="ind-check">✓</div><div class="ind-text">Blockchain-immutable Carbon Ledger. All data sensor-verified — manipulation structurally impossible.</div></div>
+        <div class="ind-row"><div class="ind-check">✓</div><div class="ind-text">CCER credits connected to Beijing Green Exchange API. Intensity-based — grows even as fleet volumes increase.</div></div>
+      </div>
+    </div>
+
+  </aside>
+
+</div>
+
+<!-- ════════════════════════════════════════════════════════════
+     FOOTER — Michelin Red back cover
+════════════════════════════════════════════════════════════ -->
+<footer class="footer-bar">
+  <div>
+    <span class="proto-tag">PROTOTYPE</span>
+    Carbon Fleet Intelligence · Michelin ESG Star Leaderboard · China Commercial Logistics · Q2 2026
+  </div>
+  <div>GRI 305 · GRI 306 · Blockchain Carbon Ledger · CCER API · PIPL Compliant</div>
+  <div>© 2026 CFI · INNOVATEChina Concept</div>
+</footer>
+
+<!-- ════════════════════════════════════════════════════════════
+     JAVASCRIPT
+════════════════════════════════════════════════════════════ -->
+<script>
+/* ════════════════════════════════════════════════════════════
+   THEME TOGGLE
+   Light (default / Michelin Guide White) ↔ Dark.
+   [data-theme] on <html> drives all CSS variable switches.
+════════════════════════════════════════════════════════════ */
+function toggleTheme() {
+  const html = document.documentElement;
+  const btn  = document.getElementById('themeBtn');
+  if (html.getAttribute('data-theme') === 'light') {
+    html.setAttribute('data-theme', 'dark');
+    btn.textContent = '☀️ Light Mode';
+  } else {
+    html.setAttribute('data-theme', 'light');
+    btn.textContent = '🌙 Dark Mode';
+  }
+}
+
+/* ════════════════════════════════════════════════════════════
+   FLEET DATA — hard-coded. Production → CFI scoring API.
+════════════════════════════════════════════════════════════ */
+const FLEETS = [
+  { id:'polarstar',  rank:1,    prev:1,    name:'PolarStar Cold Chain Group',       type:'Cold chain / pharma · 890 veh',        tier:'green',    co2:31.2, score:98.7, avoided:'4,820t', ccer:'RMB 1.9M', highlight:false },
+  { id:'eastern',    rank:2,    prev:4,    name:'Eastern Freight Alliance',          type:'Long-haul · 2,140 veh',                tier:'silver',   co2:38.4, score:96.2, avoided:'3,210t', ccer:'RMB 1.2M', highlight:false },
+  { id:'blueline',   rank:3,    prev:3,    name:'BlueLine Express Freight',          type:'Long-haul · 3,420 veh',                tier:'silver',   co2:39.1, score:95.4, avoided:'5,140t', ccer:'RMB 2.0M', highlight:false },
+  { id:'meridian',   rank:4,    prev:2,    name:'Meridian Bulk Transport',           type:'Long-haul · 5,200 veh',                tier:'green',    co2:33.8, score:94.1, avoided:'6,820t', ccer:'RMB 2.6M', highlight:false },
+  { id:'crystal',    rank:5,    prev:5,    name:'CrystalPath Pharma Logistics',      type:'Cold chain / pharma · 420 veh',        tier:'green',    co2:34.2, score:93.8, avoided:'1,240t', ccer:'RMB 480K', highlight:false },
+  { id:'greenroute', rank:6,    prev:7,    name:'GreenRoute Intercity',              type:'Long-haul · 1,870 veh',                tier:'silver',   co2:40.1, score:88.4, avoided:'2,910t', ccer:'RMB 1.1M', highlight:false },
+  { id:'ironbridge', rank:7,    prev:3,    name:'IronBridge Heavy Logistics',        type:'Long-haul · 4,100 veh',                tier:'silver',   co2:41.3, score:87.2, avoided:'4,380t', ccer:'RMB 1.7M', highlight:false },
+  { id:'voltfleet',  rank:8,    prev:9,    name:'VoltFleet EV Freight',              type:'EV commercial fleet · 680 veh',        tier:'silver',   co2:41.9, score:86.7, avoided:'1,120t', ccer:'RMB 430K', highlight:false },
+  { id:'northstar',  rank:9,    prev:15,   name:'NorthStar Logistics Group',         type:'Long-haul · 847 veh · Your Fleet',     tier:'bronze',   co2:48.2, score:79.4, avoided:'1,847t', ccer:'RMB 143K', highlight:true  },
+  { id:'swiftcargo', rank:10,   prev:10,   name:'SwiftCargo Northern',               type:'Long-haul · 2,300 veh',                tier:'bronze',   co2:49.4, score:78.1, avoided:'3,210t', ccer:'RMB 248K', highlight:false },
+  { id:'horizon',    rank:11,   prev:9,    name:'Horizon Distribution Co.',          type:'Long-haul · 1,640 veh',                tier:'bronze',   co2:51.2, score:74.3, avoided:'2,140t', ccer:'RMB 165K', highlight:false },
+  { id:'silkroad',   rank:12,   prev:15,   name:'SilkRoad Inland Freight',           type:'Long-haul · 3,800 veh',                tier:'bronze',   co2:52.7, score:72.8, avoided:'4,100t', ccer:'RMB 317K', highlight:false },
+  { id:'century',    rank:null, prev:null, name:'CenturyCargo Group',                type:'Long-haul · 6,200 veh · Not certified',tier:'progress', co2:61.4, score:null, avoided:'—',       ccer:'—',         highlight:false },
+];
+
+/* ════════════════════════════════════════════════════════════
+   FLEET DETAIL PROFILES
+════════════════════════════════════════════════════════════ */
+const DETAILS = {
+  polarstar: {
+    name: 'PolarStar Cold Chain Group — ★★★ Green Star',
+    summary: "China's leading ESG-certified cold chain operator. First fleet to achieve the Michelin Green Star. Serves pharmaceutical and premium food clients across 18 provinces. Three consecutive years as fastest-growing certified fleet.",
+    kpis: [
+      { label:'Carbon Intensity', value:'31.2 gCO₂/veh·km', color:'var(--michelin-red)' },
+      { label:'Retread Rate',     value:'94% casings reused', color:'var(--michelin-red)' },
+      { label:'CCER Credits',     value:'RMB 1.9M Q2',        color:'var(--michelin-blue)' },
+      { label:'TCO Reduction',    value:'22.4% vs baseline',  color:'var(--ok)' },
+    ]
+  },
+  northstar: {
+    name: 'NorthStar Logistics Group — ★ Bronze · Your Fleet',
+    summary: 'Ranked #9, climbing from #15 last quarter (↑6 positions). 68% progress toward Silver tier. CFI projects Silver achievement by Sep 2026 if 3 vehicles are rerouted and HVL-2201 retreading is completed this week.',
+    kpis: [
+      { label:'Carbon Intensity', value:'48.2 gCO₂/veh·km',  color:'var(--bronze-t)' },
+      { label:'Silver Gap',       value:'6.2 gCO₂ to close',  color:'var(--bronze-t)' },
+      { label:'CCER Credits',     value:'RMB 143K Q2',         color:'var(--michelin-blue)' },
+      { label:'TCO Reduction',    value:'16.8% vs baseline',   color:'var(--ok)' },
+    ]
+  },
+};
+
+/* ════════════════════════════════════════════════════════════
+   STATE
+════════════════════════════════════════════════════════════ */
+let openDetailId = null;
+
+/* ════════════════════════════════════════════════════════════
+   filterTier(tier, btn)
+   Updates active button and re-renders the table.
+════════════════════════════════════════════════════════════ */
+function filterTier(tier, btn) {
+  document.querySelectorAll('.tier-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  closeDetail();
+  renderTable(tier);
+}
+
+/* ════════════════════════════════════════════════════════════
+   renderTable(tier)
+   Filters FLEETS and injects rows into #lbBody.
+════════════════════════════════════════════════════════════ */
+function renderTable(tier) {
+  const tbody = document.getElementById('lbBody');
+  const label = document.getElementById('rowCountLabel');
+
+  const rows = tier === 'all'
+    ? FLEETS
+    : FLEETS.filter(f => f.tier === tier || f.tier === 'progress');
+
+  const certified = rows.filter(f => f.tier !== 'progress').length;
+  label.textContent = `Showing ${certified} certified fleet${certified !== 1 ? 's' : ''}`;
+
+  if (rows.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state">No fleets match this filter.</div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = rows.map(f => buildRow(f)).join('');
+}
+
+/* ════════════════════════════════════════════════════════════
+   buildRow(fleet) → HTML string for one table row.
+════════════════════════════════════════════════════════════ */
+function buildRow(f) {
+  /* Rank */
+  const rankHtml = f.rank !== null
+    ? `<span class="rank-num" style="${f.highlight ? 'color:var(--michelin-red)' : ''}">${f.rank}</span>`
+    : `<span class="col-dim">—</span>`;
+
+  /* Rank change arrow */
+  let chgHtml = '<span class="chg-same">—</span>';
+  if (f.rank !== null && f.prev !== null) {
+    const d = f.prev - f.rank;
+    if (d > 0) chgHtml = `<span class="chg-up">↑${d}</span>`;
+    if (d < 0) chgHtml = `<span class="chg-down">↓${Math.abs(d)}</span>`;
+  }
+
+  /* Name */
+  const nameHtml = `
+    <div class="co-name" style="${f.highlight ? 'color:var(--michelin-red)' : ''}">${f.name}</div>
+    <div class="co-sub">${f.type}</div>`;
+
+  /* Tier badge — green tier uses Michelin Red stars (guide authentic) */
+  let badge = '';
+  if (f.tier === 'green')    badge = `<span class="star-badge star-green">★★★ Green</span>`;
+  else if (f.tier === 'silver') badge = `<span class="star-badge star-silver">★★ Silver</span>`;
+  else if (f.tier === 'bronze') badge = `<span class="star-badge star-bronze">★ Bronze</span>`;
+  else                          badge = `<span class="star-badge star-prog">In Progress</span>`;
+
+  /* CO₂ colour */
+  let co2Style = '';
+  if (f.tier !== 'progress') {
+    if (f.co2 <= 35)       co2Style = 'color:var(--michelin-red)';  /* Green tier = red (top honour) */
+    else if (f.co2 <= 42)  co2Style = 'color:var(--silver-t)';
+    else if (f.co2 <= 55)  co2Style = 'color:var(--bronze-t)';
+    else                   co2Style = 'color:var(--crit)';
+  } else {
+    co2Style = 'color:var(--text-3)';
+  }
+
+  const scoreHtml = f.score !== null
+    ? `<span class="td-num" style="${f.highlight ? 'color:var(--michelin-red)' : ''}">${f.score}</span>`
+    : `<span class="col-dim">—</span>`;
+
+  const rowClass = f.highlight ? 'highlighted' : '';
+  const rowStyle = f.tier === 'progress' ? 'opacity:0.45' : '';
+
+  return `
+    <tr class="${rowClass}" style="${rowStyle}" onclick="openDetail('${f.id}')">
+      <td>${rankHtml}</td>
+      <td>${chgHtml}</td>
+      <td>${nameHtml}</td>
+      <td>${badge}</td>
+      <td><span class="td-num" style="${co2Style}">${f.co2} g</span></td>
+      <td>${scoreHtml}</td>
+      <td class="td-num">${f.avoided}</td>
+      <td class="td-num" style="${f.highlight ? 'color:var(--michelin-red)' : ''}">${f.ccer}</td>
+    </tr>`;
+}
+
+/* ════════════════════════════════════════════════════════════
+   openDetail(id) — show fleet detail panel below table.
+   Clicking the same fleet again toggles it closed.
+════════════════════════════════════════════════════════════ */
+function openDetail(id) {
+  const panel   = document.getElementById('detailPanel');
+  const content = document.getElementById('detailContent');
+
+  if (openDetailId === id) { closeDetail(); return; }
+  openDetailId = id;
+
+  const fleet  = FLEETS.find(f => f.id === id);
+  const detail = DETAILS[id] || {
+    name: fleet ? fleet.name : id,
+    summary: 'Detailed fleet profile available in the full CFI platform. This prototype shows extended profiles for featured fleets.',
+    kpis: [],
+  };
+
+  const kpisHtml = detail.kpis.length > 0
+    ? `<div class="detail-kpi-grid">
+        ${detail.kpis.map(k => `
+          <div class="detail-kpi">
+            <div class="dkpi-label">${k.label}</div>
+            <div class="dkpi-val" style="color:${k.color}">${k.value}</div>
+          </div>`).join('')}
+       </div>`
+    : '';
+
+  content.innerHTML = `
+    <div class="flex-between" style="flex-wrap:wrap;gap:10px;margin-bottom:4px">
+      <div>
+        <div style="font-size:13px;font-weight:600;margin-bottom:3px;color:var(--michelin-red)">${detail.name}</div>
+        <div style="font-size:11px;color:var(--text-2);line-height:1.55;max-width:540px">${detail.summary}</div>
+      </div>
+      <button onclick="closeDetail()"
+        style="background:var(--surface-3);border:1px solid var(--border-2);border-radius:5px;
+               padding:5px 12px;font-size:11px;color:var(--text-2);cursor:pointer;
+               font-family:'DM Sans',sans-serif;white-space:nowrap">Close ✕</button>
+    </div>
+    ${kpisHtml}`;
+
+  panel.classList.add('open');
+  setTimeout(() => panel.scrollIntoView({ behavior:'smooth', block:'nearest' }), 60);
+}
+
+function closeDetail() {
+  openDetailId = null;
+  document.getElementById('detailPanel').classList.remove('open');
+}
+
+/* ════════════════════════════════════════════════════════════
+   INIT
+════════════════════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', () => renderTable('all'));
+</script>
+
+</body>
+</html>

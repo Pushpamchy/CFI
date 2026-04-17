@@ -1,0 +1,2581 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<!--
+  ════════════════════════════════════════════════════════════════
+  CARBON FLEET INTELLIGENCE (CFI) — Fleet Operator Dashboard
+  Version 2.0 · INNOVATEChina 2026 · PROTOTYPE
+
+  Pages:  1. Fleet Overview   4. ESG Reports
+          2. Fleet Monitor    5. Retreading
+          3. Carbon Ledger    6. CCER Credits
+
+  Theme:  Dark (default) / Light — toggled via [data-theme] on <html>
+  Data:   All hard-coded. In production → API calls to CFI backend.
+  Fonts:  DM Sans (UI) · DM Mono (numbers) · Fraunces (headings)
+  ════════════════════════════════════════════════════════════════
+-->
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CFI — Fleet Dashboard · NorthStar Logistics Group · <span style="background:#16A34A;color:#fff;font-size:9px;padding:1px 6px;border-radius:3px;font-weight:700;letter-spacing:0.06em">FLEET VIEW</span></title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Fraunces:ital,wght@0,300;0,600;1,300&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ════════════════════════════════════════════════════════════
+       DESIGN TOKENS — CSS custom properties for both themes.
+       [data-theme="dark"]  → default dark enterprise look
+       [data-theme="light"] → clean light mode
+       All components reference var(--*) — never hard-code colours.
+    ════════════════════════════════════════════════════════════ */
+
+    /* ── DARK THEME (default) ── */
+    [data-theme="dark"] {
+      /* Brand accent */
+      --red:            #C8102E;
+      --red-dim:        rgba(200,16,46,0.10);
+      --red-border:     rgba(200,16,46,0.22);
+
+      /* Tier colours  Bronze → Silver → Green */
+      --bronze:         #C47A3A;
+      --bronze-dim:     rgba(196,122,58,0.12);
+      --bronze-border:  rgba(196,122,58,0.25);
+      --silver:         #9CA3AF;
+      --silver-dim:     rgba(156,163,175,0.12);
+      --silver-border:  rgba(156,163,175,0.25);
+      --tier-green:     #22C55E;
+      --tier-green-dim: rgba(34,197,94,0.12);
+      --tier-green-bdr: rgba(34,197,94,0.25);
+
+      /* Status */
+      --ok:             #22C55E;
+      --ok-dim:         rgba(34,197,94,0.10);
+      --warn:           #FBBF24;
+      --warn-dim:       rgba(251,191,36,0.10);
+      --crit:           #FF6B6B;
+      --crit-dim:       rgba(255,107,107,0.10);
+      --blue:           #3B82F6;
+      --blue-dim:       rgba(59,130,246,0.10);
+      --gold:           #F59E0B;
+      --gold-dim:       rgba(245,158,11,0.10);
+
+      /* Surfaces */
+      --bg:             #0A0A0A;
+      --surface-1:      #111111;   /* topbar, sidebar */
+      --surface-2:      #181818;   /* cards */
+      --surface-3:      #202020;   /* table heads, inner panels */
+      --surface-4:      #2A2A2A;   /* hover states */
+
+      /* Borders */
+      --border:         rgba(255,255,255,0.06);
+      --border-2:       rgba(255,255,255,0.11);
+
+      /* Typography */
+      --text-primary:   #F0F0F0;
+      --text-secondary: #888888;
+      --text-dim:       #444444;
+
+      /* Theme toggle icon */
+      --theme-icon:     "☀️";
+      --theme-label:    "Light Mode";
+    }
+
+    /* ── LIGHT THEME ── */
+    [data-theme="light"] {
+      --red:            #C8102E;
+      --red-dim:        rgba(200,16,46,0.07);
+      --red-border:     rgba(200,16,46,0.20);
+
+      --bronze:         #B5621A;
+      --bronze-dim:     rgba(181,98,26,0.08);
+      --bronze-border:  rgba(181,98,26,0.22);
+      --silver:         #6B7280;
+      --silver-dim:     rgba(107,114,128,0.09);
+      --silver-border:  rgba(107,114,128,0.22);
+      --tier-green:     #16A34A;
+      --tier-green-dim: rgba(22,163,74,0.08);
+      --tier-green-bdr: rgba(22,163,74,0.22);
+
+      --ok:             #16A34A;
+      --ok-dim:         rgba(22,163,74,0.08);
+      --warn:           #D97706;
+      --warn-dim:       rgba(217,119,6,0.08);
+      --crit:           #DC2626;
+      --crit-dim:       rgba(220,38,38,0.08);
+      --blue:           #2563EB;
+      --blue-dim:       rgba(37,99,235,0.08);
+      --gold:           #D97706;
+      --gold-dim:       rgba(217,119,6,0.08);
+
+      --bg:             #F8F9FA;
+      --surface-1:      #FFFFFF;
+      --surface-2:      #FFFFFF;
+      --surface-3:      #F1F3F5;
+      --surface-4:      #E9ECEF;
+
+      --border:         rgba(0,0,0,0.07);
+      --border-2:       rgba(0,0,0,0.12);
+
+      --text-primary:   #1A1A1A;
+      --text-secondary: #6B7280;
+      --text-dim:       #9CA3AF;
+
+      --theme-icon:     "🌙";
+      --theme-label:    "Dark Mode";
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       RESET & BASE
+    ════════════════════════════════════════════════════════════ */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    html { font-size: 14px; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.5;
+      transition: background 0.25s, color 0.25s;
+    }
+
+    /* Custom scrollbar — matches theme */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--surface-1); }
+    ::-webkit-scrollbar-thumb { background: var(--surface-4); border-radius: 3px; }
+
+    /* ════════════════════════════════════════════════════════════
+       TOPBAR — sticky header with logo, nav pills, controls
+    ════════════════════════════════════════════════════════════ */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 200;
+      height: 56px;
+      background: var(--surface-1);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 clamp(14px, 3vw, 32px);
+      gap: 12px;
+    }
+
+    /* Logo mark + wordmark */
+    .logo { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+
+    .logo-mark {
+      width: 28px; height: 28px;
+      background: var(--red);
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'DM Mono', monospace;
+      font-size: 11px; font-weight: 500; color: #fff;
+    }
+
+    .logo-text { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+    .logo-sub  { font-size: 11px; font-weight: 400; color: var(--text-secondary); }
+
+    /* Navigation pills — data-page used by JS */
+    .topbar-nav {
+      display: flex; align-items: center; gap: 3px;
+      background: var(--surface-3);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 4px;
+      overflow-x: auto;
+    }
+
+    .nav-btn {
+      padding: 5px 13px;
+      border-radius: 7px;
+      font-size: 12px; font-weight: 500;
+      color: var(--text-secondary);
+      background: transparent; border: none;
+      cursor: pointer; white-space: nowrap;
+      transition: background 0.15s, color 0.15s;
+    }
+    .nav-btn:hover:not(.active) { background: var(--surface-4); color: var(--text-primary); }
+    .nav-btn.active              { background: var(--red); color: #fff; }
+
+    /* Right controls: status + fleet tag + theme toggle */
+    .topbar-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+
+    .live-badge {
+      display: flex; align-items: center; gap: 6px;
+      font-family: 'DM Mono', monospace; font-size: 11px;
+      color: var(--ok);
+    }
+
+    .live-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--ok);
+      animation: blink 2s ease-in-out infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+    .fleet-tag-sm {
+      font-size: 11px; color: var(--text-secondary); font-weight: 500;
+    }
+
+    .tier-chip {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 3px 9px; border-radius: 4px;
+      font-size: 10px; font-weight: 700; letter-spacing: 0.05em;
+      font-family: 'DM Mono', monospace;
+      background: var(--bronze-dim); border: 1px solid var(--bronze-border);
+      color: var(--bronze);
+    }
+
+    /* Theme toggle button */
+    .theme-btn {
+      display: flex; align-items: center; gap: 5px;
+      padding: 5px 11px; border-radius: 7px;
+      background: var(--surface-3); border: 1px solid var(--border-2);
+      font-size: 11px; font-weight: 500; color: var(--text-secondary);
+      cursor: pointer; font-family: 'DM Sans', sans-serif;
+      transition: background 0.15s, color 0.15s;
+      white-space: nowrap;
+    }
+    .theme-btn:hover { background: var(--surface-4); color: var(--text-primary); }
+
+    /* ════════════════════════════════════════════════════════════
+       APP LAYOUT — sidebar + scrollable content
+    ════════════════════════════════════════════════════════════ */
+    .app-layout {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      min-height: calc(100vh - 56px);
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       SIDEBAR
+    ════════════════════════════════════════════════════════════ */
+    .sidebar {
+      background: var(--surface-1);
+      border-right: 1px solid var(--border);
+      padding: 18px 0;
+      display: flex; flex-direction: column; gap: 4px;
+      position: sticky; top: 56px;
+      height: calc(100vh - 56px);
+      overflow-y: auto;
+    }
+
+    .sidebar-section { padding: 0 12px; margin-bottom: 4px; }
+
+    .sidebar-label {
+      font-size: 9px; font-weight: 600;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--text-dim); padding: 0 8px; margin-bottom: 4px;
+    }
+
+    .sidebar-item {
+      display: flex; align-items: center; gap: 9px;
+      padding: 8px 10px; border-radius: 7px;
+      font-size: 12.5px; font-weight: 500;
+      color: var(--text-secondary);
+      cursor: pointer; border: 1px solid transparent;
+      transition: background 0.12s, color 0.12s;
+    }
+    .sidebar-item:hover:not(.active) { background: var(--surface-3); color: var(--text-primary); }
+    .sidebar-item.active             { background: var(--red-dim); border-color: var(--red-border); color: var(--red); }
+
+    .sidebar-badge {
+      margin-left: auto;
+      background: var(--red); color: #fff;
+      font-size: 9px; font-weight: 700;
+      padding: 2px 5px; border-radius: 3px;
+      font-family: 'DM Mono', monospace;
+    }
+
+    .sidebar-divider { height: 1px; background: var(--border); margin: 6px 12px; }
+
+    /* ESG progress block */
+    .esg-progress-block {
+      margin: 6px 12px;
+      background: var(--bronze-dim);
+      border: 1px solid var(--bronze-border);
+      border-radius: 10px; padding: 14px;
+    }
+    .epb-label { font-size: 9px; font-weight: 600; letter-spacing: 0.10em; text-transform: uppercase; color: var(--bronze); margin-bottom: 5px; }
+    .epb-value { font-family: 'Fraunces', serif; font-size: 20px; font-weight: 600; color: var(--bronze); line-height: 1; margin-bottom: 2px; }
+    .epb-sub   { font-size: 10px; color: var(--text-secondary); margin-bottom: 9px; }
+
+    .tier-bar { height: 3px; background: var(--surface-3); border-radius: 2px; overflow: hidden; margin-bottom: 5px; }
+    .tier-fill { height: 100%; border-radius: 2px; background: linear-gradient(90deg, var(--bronze), #E89A5A); }
+    .tier-labs { display: flex; justify-content: space-between; font-size: 9px; color: var(--text-dim); font-family: 'DM Mono', monospace; }
+
+    /* ════════════════════════════════════════════════════════════
+       CONTENT AREA & PAGE PANELS
+    ════════════════════════════════════════════════════════════ */
+    .content-area {
+      padding: clamp(14px, 3vw, 28px) clamp(14px, 3vw, 32px);
+      display: flex; flex-direction: column; gap: 20px;
+      overflow-y: auto;
+    }
+
+    /* Each tab panel — only .active is shown */
+    .page-panel { display: none; flex-direction: column; gap: 20px; }
+    .page-panel.active { display: flex; }
+
+    /* ════════════════════════════════════════════════════════════
+       PAGE HEADER (title + action buttons)
+    ════════════════════════════════════════════════════════════ */
+    .page-header {
+      display: flex; align-items: flex-start;
+      justify-content: space-between; flex-wrap: wrap; gap: 12px;
+    }
+
+    .page-title {
+      font-family: 'Fraunces', serif;
+      font-size: clamp(20px, 3vw, 26px);
+      font-weight: 300; line-height: 1.2; color: var(--text-primary);
+    }
+    .page-title em { font-style: italic; color: var(--red); }
+    .page-meta { font-size: 11px; color: var(--text-secondary); margin-top: 3px; font-family: 'DM Mono', monospace; }
+
+    .header-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+    /* ════════════════════════════════════════════════════════════
+       BUTTONS
+    ════════════════════════════════════════════════════════════ */
+    .btn {
+      padding: 7px 15px; border-radius: 7px;
+      font-size: 12px; font-weight: 500;
+      font-family: 'DM Sans', sans-serif;
+      cursor: pointer; border: none;
+      transition: opacity 0.15s, background 0.15s;
+    }
+    .btn:hover { opacity: 0.85; }
+    .btn-ghost   { background: var(--surface-3); color: var(--text-secondary); border: 1px solid var(--border-2); }
+    .btn-primary { background: var(--red); color: #fff; }
+    .btn-sm      { padding: 5px 10px; font-size: 11px; }
+
+    /* ════════════════════════════════════════════════════════════
+       GRID HELPERS — responsive collapse on narrow screens
+    ════════════════════════════════════════════════════════════ */
+    .grid-4   { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; }
+    .grid-2   { display: grid; grid-template-columns: 1fr 1fr;       gap: 14px; }
+    .grid-3-1 { display: grid; grid-template-columns: 2fr 1fr;       gap: 14px; }
+
+    @media (max-width: 1200px) { .grid-4 { grid-template-columns: repeat(2,1fr); } }
+    @media (max-width: 1100px) { .grid-3-1,.grid-2 { grid-template-columns: 1fr; } .app-layout { grid-template-columns: 1fr; } .sidebar { display: none; } }
+    @media (max-width:  700px) { .grid-4 { grid-template-columns: 1fr; } }
+
+    /* ════════════════════════════════════════════════════════════
+       CARDS
+    ════════════════════════════════════════════════════════════ */
+    .card {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 10px; overflow: hidden;
+      transition: background 0.25s, border-color 0.25s;
+    }
+
+    .card-header {
+      padding: 13px 17px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;
+    }
+
+    .card-title {
+      font-size: 11px; font-weight: 600;
+      letter-spacing: 0.06em; text-transform: uppercase;
+      color: var(--text-primary);
+    }
+
+    .card-badge {
+      font-size: 10px; font-family: 'DM Mono', monospace;
+      color: var(--text-secondary);
+      background: var(--surface-3);
+      padding: 3px 8px; border-radius: 4px; white-space: nowrap;
+    }
+
+    .card-body { padding: 17px; }
+
+    /* ════════════════════════════════════════════════════════════
+       KPI CARDS — coloured top stripe per metric type
+    ════════════════════════════════════════════════════════════ */
+    .kpi-card {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 10px; padding: 17px;
+      position: relative; overflow: hidden;
+      transition: background 0.25s;
+    }
+    /* Top accent stripe via pseudo-element */
+    .kpi-card::after {
+      content: ''; position: absolute;
+      top: 0; left: 0; right: 0; height: 2px;
+    }
+    .kpi-card.red::after    { background: var(--red); }
+    .kpi-card.bronze::after { background: var(--bronze); }
+    .kpi-card.green::after  { background: var(--tier-green); }
+    .kpi-card.blue::after   { background: var(--blue); }
+    .kpi-card.gold::after   { background: var(--gold); }
+
+    .kpi-label {
+      font-size: 10px; font-weight: 600;
+      letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--text-secondary); margin-bottom: 8px;
+    }
+
+    .kpi-value {
+      font-family: 'DM Mono', monospace;
+      font-size: clamp(22px, 3vw, 28px);
+      font-weight: 500; line-height: 1; margin-bottom: 4px;
+    }
+    .kpi-card.red    .kpi-value { color: var(--crit); }
+    .kpi-card.bronze .kpi-value { color: var(--bronze); }
+    .kpi-card.green  .kpi-value { color: var(--tier-green); }
+    .kpi-card.blue   .kpi-value { color: var(--blue); }
+    .kpi-card.gold   .kpi-value { color: var(--gold); }
+
+    .kpi-sub          { font-size: 10px; color: var(--text-dim); }
+    .kpi-delta        { font-size: 11px; font-family: 'DM Mono', monospace; margin-top: 4px; }
+    .delta-good       { color: var(--ok); }
+    .delta-bad        { color: var(--crit); }
+
+    /* ════════════════════════════════════════════════════════════
+       INLINE BADGES
+    ════════════════════════════════════════════════════════════ */
+    .badge {
+      display: inline-flex; align-items: center; gap: 3px;
+      padding: 3px 8px; border-radius: 4px;
+      font-size: 10px; font-weight: 700;
+      font-family: 'DM Mono', monospace; white-space: nowrap;
+    }
+    .badge-green  { background: var(--tier-green-dim);  color: var(--tier-green);  border: 1px solid var(--tier-green-bdr); }
+    .badge-silver { background: var(--silver-dim);      color: var(--silver);      border: 1px solid var(--silver-border); }
+    .badge-bronze { background: var(--bronze-dim);      color: var(--bronze);      border: 1px solid var(--bronze-border); }
+    .badge-ok     { background: var(--ok-dim);          color: var(--ok);          border: 1px solid rgba(34,197,94,0.22); }
+    .badge-warn   { background: var(--warn-dim);        color: var(--warn);        border: 1px solid rgba(251,191,36,0.25); }
+    .badge-crit   { background: var(--crit-dim);        color: var(--crit);        border: 1px solid rgba(220,38,38,0.22); }
+    .badge-info   { background: var(--blue-dim);        color: var(--blue);        border: 1px solid rgba(59,130,246,0.22); }
+    .badge-muted  { background: var(--surface-3);       color: var(--text-dim);    border: 1px solid var(--border); }
+
+    /* ════════════════════════════════════════════════════════════
+       DATA TABLE
+    ════════════════════════════════════════════════════════════ */
+    .data-table { width: 100%; border-collapse: collapse; }
+
+    .data-table th {
+      font-size: 9px; font-weight: 600;
+      letter-spacing: 0.09em; text-transform: uppercase;
+      color: var(--text-dim);
+      padding: 8px 12px;
+      background: var(--surface-3);
+      text-align: left; white-space: nowrap;
+    }
+
+    .data-table td {
+      font-size: 12px; padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle; color: var(--text-primary);
+    }
+    .data-table tr:last-child td  { border-bottom: none; }
+    .data-table tbody tr          { transition: background 0.12s; cursor: pointer; }
+    .data-table tbody tr:hover    { background: var(--surface-3); }
+
+    .td-num  { font-family: 'DM Mono', monospace; font-size: 11px; }
+    .td-main { font-size: 12.5px; font-weight: 500; }
+    .td-sub  { font-size: 10px; color: var(--text-secondary); margin-top: 2px; }
+
+    /* ════════════════════════════════════════════════════════════
+       MINI BAR (health bars, stream bars)
+    ════════════════════════════════════════════════════════════ */
+    .mini-bar-wrap { height: 5px; background: var(--surface-3); border-radius: 3px; overflow: hidden; min-width: 60px; }
+    .mini-bar-fill { height: 100%; border-radius: 3px; transition: width 0.4s ease; }
+
+    /* ════════════════════════════════════════════════════════════
+       GAUGE (semicircle for carbon intensity)
+    ════════════════════════════════════════════════════════════ */
+    .gauge-wrap { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+    .gauge-big  { font-family: 'DM Mono', monospace; font-size: 26px; font-weight: 500; color: var(--bronze); text-align: center; }
+    .gauge-unit { font-size: 9px; color: var(--text-secondary); text-align: center; margin-top: -6px; }
+
+    .gauge-targets { width: 100%; display: flex; flex-direction: column; gap: 7px; }
+    .gauge-row     { display: flex; justify-content: space-between; align-items: center; }
+    .gauge-lbl     { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-secondary); }
+    .gauge-dot     { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+    .gauge-val     { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-primary); }
+
+    /* ════════════════════════════════════════════════════════════
+       ALERT ITEMS
+    ════════════════════════════════════════════════════════════ */
+    .alert-list { display: flex; flex-direction: column; gap: 8px; }
+
+    .alert-item {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 11px 13px;
+      background: var(--surface-3); border-radius: 7px;
+      border-left: 3px solid transparent;
+    }
+    .alert-item.crit { border-left-color: var(--red); }
+    .alert-item.warn { border-left-color: var(--warn); }
+    .alert-item.info { border-left-color: var(--blue); }
+
+    .alert-icon {
+      width: 18px; height: 18px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 9px; font-weight: 700; flex-shrink: 0;
+    }
+    .alert-icon.crit { background: var(--red-dim);   color: var(--red); }
+    .alert-icon.warn { background: var(--warn-dim);  color: var(--warn); }
+    .alert-icon.info { background: var(--blue-dim);  color: var(--blue); }
+
+    .alert-text { font-size: 12px; color: var(--text-primary); line-height: 1.4; }
+    .alert-meta { font-size: 10px; color: var(--text-secondary); margin-top: 2px; font-family: 'DM Mono', monospace; }
+
+    /* ════════════════════════════════════════════════════════════
+       REVENUE STREAM ROWS
+    ════════════════════════════════════════════════════════════ */
+    .stream-list { display: flex; flex-direction: column; gap: 10px; }
+    .stream-row  { display: flex; align-items: center; gap: 10px; }
+    .stream-name { font-size: 11px; color: var(--text-secondary); width: 120px; flex-shrink: 0; }
+    .stream-val  { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-primary); width: 52px; text-align: right; flex-shrink: 0; }
+
+    /* ════════════════════════════════════════════════════════════
+       COMPLIANCE TIMELINE
+    ════════════════════════════════════════════════════════════ */
+    .timeline { display: flex; flex-direction: column; position: relative; }
+    .timeline::before {
+      content: ''; position: absolute;
+      left: 14px; top: 8px; bottom: 8px; width: 1px;
+      background: var(--border-2);
+    }
+    .timeline-item { display: flex; gap: 14px; padding: 9px 0; }
+
+    .tl-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+      flex-shrink: 0; margin-top: 4px;
+      margin-left: 10px; position: relative; z-index: 1;
+    }
+    .tl-dot.done   { background: var(--ok); }
+    .tl-dot.active { background: var(--bronze); box-shadow: 0 0 0 3px var(--bronze-dim); }
+    .tl-dot.next   { background: var(--surface-3); border: 1px solid var(--border-2); }
+
+    .tl-label { font-size: 12px; font-weight: 500; line-height: 1.3; color: var(--text-primary); }
+    .tl-date  { font-size: 10px; color: var(--text-secondary); font-family: 'DM Mono', monospace; margin-top: 2px; }
+
+    /* ════════════════════════════════════════════════════════════
+       ACTION CARDS (weekly recommendations)
+    ════════════════════════════════════════════════════════════ */
+    .action-cards { display: flex; flex-direction: column; gap: 10px; }
+    .action-card  { border-radius: 7px; padding: 13px; border: 1px solid transparent; }
+    .action-card.crit { background: var(--crit-dim);  border-color: rgba(220,38,38,0.18); }
+    .action-card.warn { background: var(--warn-dim);  border-color: rgba(251,191,36,0.18); }
+    .action-card.info { background: var(--blue-dim);  border-color: rgba(59,130,246,0.18); }
+
+    .ac-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 5px; }
+    .ac-title  { font-size: 12px; font-weight: 600; }
+    .ac-body   { font-size: 11px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 5px; }
+    .ac-impact { font-size: 10px; color: var(--text-dim); font-family: 'DM Mono', monospace; }
+
+    .action-card.crit .ac-title { color: var(--crit); }
+    .action-card.warn .ac-title { color: var(--warn); }
+    .action-card.info .ac-title { color: var(--blue); }
+
+    /* ════════════════════════════════════════════════════════════
+       FLEET MONITOR — China SVG Map
+    ════════════════════════════════════════════════════════════ */
+    .map-wrap { width: 100%; background: var(--surface-3); border-radius: 10px; border: 1px solid var(--border); overflow: hidden; position: relative; }
+
+    /* Map tooltip shown on dot hover */
+    .map-tooltip {
+      position: absolute;
+      background: var(--surface-1); border: 1px solid var(--border-2);
+      border-radius: 7px; padding: 10px 13px;
+      font-size: 11px; pointer-events: none;
+      display: none; z-index: 10; min-width: 180px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+    .map-tooltip.visible { display: block; }
+    .mtt-name  { font-size: 12px; font-weight: 600; margin-bottom: 6px; color: var(--text-primary); }
+    .mtt-row   { display: flex; justify-content: space-between; gap: 16px; margin-bottom: 3px; }
+    .mtt-label { font-size: 10px; color: var(--text-secondary); }
+    .mtt-val   { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text-primary); }
+
+    /* ════════════════════════════════════════════════════════════
+       CARBON LEDGER — blockchain hash styling
+    ════════════════════════════════════════════════════════════ */
+    .chain-hash {
+      font-family: 'DM Mono', monospace; font-size: 10px;
+      color: var(--text-dim); overflow: hidden;
+      text-overflow: ellipsis; white-space: nowrap; max-width: 130px;
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       ESG REPORTS — report card grid
+    ════════════════════════════════════════════════════════════ */
+    .report-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(190px,1fr));
+      gap: 11px;
+    }
+
+    .report-card {
+      background: var(--surface-3); border: 1px solid var(--border);
+      border-radius: 7px; padding: 15px;
+      cursor: pointer; transition: border-color 0.15s, background 0.15s;
+      display: flex; flex-direction: column; gap: 7px;
+    }
+    .report-card:hover { border-color: var(--border-2); background: var(--surface-4); }
+    .report-icon { font-size: 20px; line-height: 1; }
+    .report-name { font-size: 12px; font-weight: 600; color: var(--text-primary); }
+    .report-sub  { font-size: 10px; color: var(--text-secondary); }
+
+    /* ════════════════════════════════════════════════════════════
+       RETREADING — lifecycle stages bar
+    ════════════════════════════════════════════════════════════ */
+    .lifecycle-bar {
+      display: flex; align-items: stretch; margin: 8px 0;
+      border-radius: 7px; overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .lc-stage {
+      flex: 1; text-align: center;
+      padding: 9px 4px; font-size: 10px; font-weight: 500;
+      background: var(--surface-3); color: var(--text-secondary);
+      border-right: 1px solid var(--border);
+    }
+    .lc-stage:last-child   { border-right: none; }
+    .lc-stage.lc-active    { background: var(--red-dim); border-color: var(--red-border); color: var(--red); font-weight: 600; }
+
+    /* ════════════════════════════════════════════════════════════
+       FOOTER BAR
+    ════════════════════════════════════════════════════════════ */
+    .footer-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 8px;
+      padding: 10px clamp(14px, 3vw, 32px);
+      background: var(--surface-1); border-top: 1px solid var(--border);
+      font-size: 10px; color: var(--text-dim);
+      font-family: 'DM Mono', monospace;
+    }
+
+    .proto-tag {
+      background: var(--red-dim); color: var(--red);
+      border: 1px solid var(--red-border);
+      padding: 2px 7px; border-radius: 3px;
+      font-size: 9px; font-weight: 600; letter-spacing: 0.06em; margin-right: 8px;
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       UTILITY HELPERS
+    ════════════════════════════════════════════════════════════ */
+    .flex-row     { display: flex; align-items: center; gap: 8px; }
+    .flex-between { display: flex; align-items: center; justify-content: space-between; }
+    .gap-4  { gap: 4px; }
+    .gap-12 { gap: 12px; }
+    .divider { height: 1px; background: var(--border); margin: 10px 0; }
+    .mt-4   { margin-top: 4px; }
+    .mt-8   { margin-top: 8px; }
+    .mt-12  { margin-top: 12px; }
+    .col-green  { color: var(--tier-green); }
+    .col-silver { color: var(--silver); }
+    .col-bronze { color: var(--bronze); }
+    .col-red    { color: var(--crit); }
+    .col-dim    { color: var(--text-dim); }
+    .col-sec    { color: var(--text-secondary); }
+    .col-ok     { color: var(--ok); }
+    .col-gold   { color: var(--gold); }
+    .col-blue   { color: var(--blue); }
+  </style>
+</head>
+
+<body>
+
+<!-- ════════════════════════════════════════════════════════════
+     TOPBAR
+════════════════════════════════════════════════════════════ -->
+<header class="topbar">
+
+  <!-- Brand -->
+  <div class="logo">
+    <div class="logo-mark">CFI</div>
+    <div>
+      <span class="logo-text">Carbon Fleet Intelligence</span>
+      <span class="logo-sub"> by Michelin</span>
+    </div>
+  </div>
+
+  <!-- Page navigation tabs -->
+  <nav class="topbar-nav">
+    <button class="nav-btn active" data-page="overview"      onclick="switchPage('overview',this)">Fleet Overview</button>
+    <button class="nav-btn"        data-page="fleet-monitor" onclick="switchPage('fleet-monitor',this)">Fleet Monitor</button>
+    <button class="nav-btn"        data-page="carbon-ledger" onclick="switchPage('carbon-ledger',this)">Carbon Ledger</button>
+    <button class="nav-btn"        data-page="esg-reports"   onclick="switchPage('esg-reports',this)">ESG Reports</button>
+    <button class="nav-btn"        data-page="retreading"    onclick="switchPage('retreading',this)">Retreading</button>
+    <button class="nav-btn"        data-page="ccer-credits"  onclick="switchPage('ccer-credits',this)">CCER Credits</button>
+    <button class="nav-btn"        data-page="cost-savings"  onclick="switchPage('cost-savings',this)">Cost Savings</button>
+  </nav>
+
+  <!-- Right controls -->
+  <div class="topbar-right">
+    <div class="live-badge"><div class="live-dot"></div>LIVE · 847 vehicles</div>
+    <span class="fleet-tag-sm">NorthStar Logistics Group</span>
+    <span class="tier-chip">★ ESG BRONZE</span>
+    <!-- Dark / Light theme toggle -->
+    <button class="theme-btn" onclick="toggleTheme()" id="themeBtn">☀️ Light Mode</button>
+  </div>
+
+</header>
+
+<!-- ════════════════════════════════════════════════════════════
+     APP LAYOUT — sidebar + content
+════════════════════════════════════════════════════════════ -->
+<div class="app-layout">
+
+  <!-- ── SIDEBAR ──────────────────────────────────────────── -->
+  <aside class="sidebar">
+
+    <div class="sidebar-section">
+      <p class="sidebar-label">Operations</p>
+
+      <div class="sidebar-item active" onclick="switchPage('overview',null)">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor">
+          <rect x="1" y="1" width="6" height="6" rx="1"/>
+          <rect x="9" y="1" width="6" height="6" rx="1"/>
+          <rect x="1" y="9" width="6" height="6" rx="1"/>
+          <rect x="9" y="9" width="6" height="6" rx="1"/>
+        </svg>
+        Dashboard
+      </div>
+
+      <div class="sidebar-item" onclick="switchPage('fleet-monitor',null)">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="8" cy="8" r="6"/><path d="M8 4v4l3 2"/>
+        </svg>
+        Fleet Monitor
+        <span class="sidebar-badge">3</span>
+      </div>
+
+      <div class="sidebar-item" onclick="switchPage('carbon-ledger',null)">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M2 4h12M2 8h12M2 12h8"/>
+        </svg>
+        Carbon Ledger
+      </div>
+    </div>
+
+    <div class="sidebar-divider"></div>
+
+    <div class="sidebar-section">
+      <p class="sidebar-label">Compliance</p>
+
+      <div class="sidebar-item" onclick="switchPage('esg-reports',null)">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="2" y="2" width="12" height="12" rx="1"/><path d="M5 6h6M5 9h4"/>
+        </svg>
+        ESG Reports
+      </div>
+
+      <div class="sidebar-item" onclick="switchPage('retreading',null)">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="8" cy="8" r="5"/><circle cx="8" cy="8" r="2"/>
+        </svg>
+        Retreading
+      </div>
+
+      <div class="sidebar-item" onclick="switchPage('ccer-credits',null)">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M8 2v12M4 6l4-4 4 4M4 10l4 4 4-4"/>
+        </svg>
+        CCER Credits
+      </div>
+
+      <div class="sidebar-item" onclick="switchPage('cost-savings',null)">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="8" cy="8" r="6"/><path d="M8 5v6M6 7h3.5a1.5 1.5 0 0 1 0 3H6"/>
+        </svg>
+        Cost Savings
+      </div>
+    </div>
+
+    <div class="sidebar-divider"></div>
+
+    <!-- ESG Star progress block -->
+    <div class="esg-progress-block">
+      <p class="epb-label">Michelin ESG Star</p>
+      <p class="epb-value">★ Bronze</p>
+      <p class="epb-sub">68% toward Silver tier</p>
+      <div class="tier-bar"><div class="tier-fill" style="width:68%"></div></div>
+      <div class="tier-labs"><span>Bronze</span><span>Silver</span><span>Green</span></div>
+    </div>
+
+  </aside>
+
+  <!-- ── CONTENT AREA ──────────────────────────────────────── -->
+  <main class="content-area">
+
+    <!-- ══════════════════════════════════════════════════════
+         PAGE 1 — FLEET OVERVIEW
+    ══════════════════════════════════════════════════════ -->
+    <section class="page-panel active" id="page-overview">
+
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Fleet <em>Carbon</em> Dashboard</h1>
+          <p class="page-meta">847 active vehicles · Last sync 2 min ago · Q2 2026</p>
+        </div>
+        <div class="header-actions">
+          <button class="btn btn-ghost" onclick="alert('GRI Report export — would generate signed PDF in production')">Export GRI Report</button>
+          <button class="btn btn-primary" onclick="alert('ESG Certificate download — blockchain-referenced PDF in production')">Download ESG Certificate</button>
+        </div>
+      </div>
+
+      <!-- KPI row -->
+      <div class="grid-4">
+        <div class="kpi-card red">
+          <p class="kpi-label">Fleet Carbon Intensity</p>
+          <p class="kpi-value">48.2</p>
+          <p class="kpi-sub">gCO₂/vehicle·km</p>
+          <p class="kpi-delta delta-good">↓ 12.4% vs baseline</p>
+        </div>
+        <div class="kpi-card bronze">
+          <p class="kpi-label">CCER Credits Earned</p>
+          <p class="kpi-value">1,847</p>
+          <p class="kpi-sub">tonnes CO₂e · RMB 143K</p>
+          <p class="kpi-delta delta-good">↑ 23% this quarter</p>
+        </div>
+        <div class="kpi-card green">
+          <p class="kpi-label">Tyre Health Score</p>
+          <p class="kpi-value">91.3</p>
+          <p class="kpi-sub">fleet average · 9 alerts</p>
+          <p class="kpi-delta delta-good">↑ 4.1 pts Smart Predictive</p>
+        </div>
+        <div class="kpi-card blue">
+          <p class="kpi-label">TCO Reduction</p>
+          <p class="kpi-value">16.8%</p>
+          <p class="kpi-sub">vs pre-CFI baseline</p>
+          <p class="kpi-delta delta-good">RMB 2.4M saved YTD</p>
+        </div>
+      </div>
+
+      <!-- Carbon trend + gauge -->
+      <div class="grid-3-1">
+
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Carbon Intensity Trend</span>
+            <div class="flex-row gap-4">
+              <span class="card-badge">gCO₂/vehicle·km</span>
+              <span class="card-badge" style="color:var(--ok)">GRI 305 Aligned</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <!-- SVG line chart — hard-coded path data representing real trend shape -->
+            <svg width="100%" height="150" viewBox="0 0 500 150" preserveAspectRatio="none">
+              <!-- Grid lines -->
+              <line x1="0" y1="20"  x2="500" y2="20"  stroke="var(--border)" stroke-width="1"/>
+              <line x1="0" y1="55"  x2="500" y2="55"  stroke="var(--border)" stroke-width="1"/>
+              <line x1="0" y1="90"  x2="500" y2="90"  stroke="var(--border)" stroke-width="1"/>
+              <line x1="0" y1="125" x2="500" y2="125" stroke="var(--border)" stroke-width="1"/>
+              <!-- Silver target dashed reference line -->
+              <line x1="0" y1="72" x2="500" y2="72" stroke="rgba(156,163,175,0.35)" stroke-width="1" stroke-dasharray="5,4"/>
+              <text x="4" y="68" fill="rgba(156,163,175,0.55)" font-size="8" font-family="DM Mono,monospace">Silver: 42 gCO₂</text>
+              <!-- Pre-CFI trajectory (dashed, faded) -->
+              <path d="M0,32 L60,35 L120,38 L180,43 L240,56 L300,62 L360,65 L420,68 L500,71"
+                    fill="none" stroke="rgba(200,16,46,0.22)" stroke-width="1.5" stroke-dasharray="4,3"/>
+              <!-- CFI-improved trajectory (solid red) — starts from activation marker -->
+              <path d="M180,43 L240,38 L300,31 L360,26 L420,21 L500,18"
+                    fill="none" stroke="var(--red)" stroke-width="2.5"/>
+              <!-- Area fill under CFI line -->
+              <path d="M180,43 L240,38 L300,31 L360,26 L420,21 L500,18 L500,71 L420,68 L360,65 L300,62 L240,56 L180,43 Z"
+                    fill="rgba(200,16,46,0.07)"/>
+              <!-- CFI activation dot -->
+              <circle cx="180" cy="43" r="4" fill="var(--red)"/>
+              <text x="186" y="39" fill="var(--red)" font-size="8" font-family="DM Mono,monospace">CFI activated</text>
+              <!-- Current value dot with glow ring -->
+              <circle cx="500" cy="18" r="9" fill="rgba(200,16,46,0.18)"/>
+              <circle cx="500" cy="18" r="5" fill="var(--red)"/>
+              <!-- Y-axis labels -->
+              <text x="3" y="18"  fill="var(--text-dim)" font-size="8" font-family="DM Mono,monospace">55</text>
+              <text x="3" y="53"  fill="var(--text-dim)" font-size="8" font-family="DM Mono,monospace">50</text>
+              <text x="3" y="88"  fill="var(--text-dim)" font-size="8" font-family="DM Mono,monospace">45</text>
+              <text x="3" y="123" fill="var(--text-dim)" font-size="8" font-family="DM Mono,monospace">40</text>
+            </svg>
+            <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--text-dim);font-family:'DM Mono',monospace;margin-top:7px">
+              <span>Jan 2026</span><span>Feb</span><span>Mar</span><span>Apr</span><span>May</span><span>Jun 2026</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live intensity gauge -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Live Intensity</span>
+            <span class="card-badge">Real-time</span>
+          </div>
+          <div class="card-body">
+            <div class="gauge-wrap">
+              <!-- SVG semicircle gauge -->
+              <svg width="150" height="85" viewBox="0 0 150 85">
+                <path d="M 18 80 A 58 58 0 0 1 132 80" fill="none" stroke="var(--surface-3)" stroke-width="11" stroke-linecap="round"/>
+                <path d="M 18 80 A 58 58 0 0 1 60 27"  fill="none" stroke="rgba(34,197,94,0.22)"  stroke-width="11" stroke-linecap="round"/>
+                <path d="M 60 27 A 58 58 0 0 1 132 80" fill="none" stroke="rgba(200,16,46,0.12)"  stroke-width="11" stroke-linecap="round"/>
+                <!-- Arc representing current value (48.2 on 35–65 scale ≈ 74% of arc) -->
+                <path d="M 18 80 A 58 58 0 0 1 106 34" fill="none" stroke="var(--red)"           stroke-width="11" stroke-linecap="round"/>
+                <line x1="75" y1="80" x2="107" y2="34" stroke="var(--text-primary)" stroke-width="2" stroke-linecap="round"/>
+                <circle cx="75" cy="80" r="5" fill="var(--red)"/>
+              </svg>
+              <div>
+                <div class="gauge-big">48.2</div>
+                <div class="gauge-unit">gCO₂/vehicle·km</div>
+              </div>
+              <div class="gauge-targets" style="width:100%">
+                <div class="gauge-row">
+                  <span class="gauge-lbl"><span class="gauge-dot" style="background:var(--tier-green)"></span>Green Target</span>
+                  <span class="gauge-val">35 gCO₂</span>
+                </div>
+                <div class="gauge-row">
+                  <span class="gauge-lbl"><span class="gauge-dot" style="background:var(--silver)"></span>Silver Target</span>
+                  <span class="gauge-val">42 gCO₂</span>
+                </div>
+                <div class="gauge-row">
+                  <span class="gauge-lbl"><span class="gauge-dot" style="background:var(--text-dim)"></span>China Average</span>
+                  <span class="gauge-val">61 gCO₂</span>
+                </div>
+                <div class="gauge-row">
+                  <span class="gauge-lbl"><span class="gauge-dot" style="background:var(--red)"></span>Your Fleet</span>
+                  <span class="gauge-val col-bronze">48.2 gCO₂</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Vehicle table preview + right column -->
+      <div class="grid-3-1">
+
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Fleet Vehicle Monitor</span>
+            <div class="flex-row gap-4">
+              <span class="card-badge">847 vehicles · 9 alerts</span>
+              <button class="btn btn-sm btn-ghost" onclick="switchPage('fleet-monitor',null)">View All →</button>
+            </div>
+          </div>
+          <div class="card-body" style="padding:10px 14px">
+            <table class="data-table">
+              <thead>
+                <tr><th>#</th><th>Vehicle / Route</th><th>CO₂ Intensity</th><th>Tyre Health</th><th>Alert</th><th>ESG Pts</th></tr>
+              </thead>
+              <tbody id="overviewVehicleBody">
+                <!-- Filled by renderOverviewVehicles() -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Alerts + streams -->
+        <div style="display:flex;flex-direction:column;gap:14px">
+
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Smart Alerts</span>
+              <span class="card-badge" style="color:var(--crit)">9 Active</span>
+            </div>
+            <div class="card-body">
+              <div class="alert-list">
+                <div class="alert-item crit">
+                  <div class="alert-icon crit">!</div>
+                  <div>
+                    <p class="alert-text">HVL-2201 tyre failure predicted in 6 days</p>
+                    <p class="alert-meta">Smart Predictive · Rear axle · Schedule now</p>
+                  </div>
+                </div>
+                <div class="alert-item warn">
+                  <div class="alert-icon warn">⚠</div>
+                  <div>
+                    <p class="alert-text">3 vehicles exceed Silver threshold</p>
+                    <p class="alert-meta">Reroute recommended · −4.2 gCO₂</p>
+                  </div>
+                </div>
+                <div class="alert-item info">
+                  <div class="alert-icon info">i</div>
+                  <div>
+                    <p class="alert-text">84 tyres eligible for retreading</p>
+                    <p class="alert-meta">Est. RMB 142K retreading margin</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Your CFI Savings Breakdown</span>
+              <span class="card-badge">per vehicle / yr · RMB</span>
+            </div>
+            <div class="card-body">
+              <div class="stream-list">
+                <div class="stream-row">
+                  <span class="stream-name">Tyre cost saving</span>
+                  <div style="flex:1"><div class="mini-bar-wrap"><div class="mini-bar-fill" style="width:72%;background:var(--bronze)"></div></div></div>
+                  <span class="stream-val col-bronze">RMB 8,082</span>
+                </div>
+                <div class="stream-row">
+                  <span class="stream-name">Downtime avoided</span>
+                  <div style="flex:1"><div class="mini-bar-wrap"><div class="mini-bar-fill" style="width:42%;background:var(--ok)"></div></div></div>
+                  <span class="stream-val col-ok">RMB 4,665</span>
+                </div>
+                <div class="stream-row">
+                  <span class="stream-name">Fuel saving</span>
+                  <div style="flex:1"><div class="mini-bar-wrap"><div class="mini-bar-fill" style="width:8%;background:var(--blue)"></div></div></div>
+                  <span class="stream-val col-blue">RMB 873</span>
+                </div>
+                <div class="stream-row">
+                  <span class="stream-name">CCER credits earned</span>
+                  <div style="flex:1"><div class="mini-bar-wrap"><div class="mini-bar-fill" style="width:7%;background:var(--gold)"></div></div></div>
+                  <span class="stream-val col-gold">RMB 697</span>
+                </div>
+                <div class="divider"></div>
+                <div class="flex-between">
+                  <span class="col-sec" style="font-size:11px">Total saving / vehicle / year</span>
+                  <span style="font-family:'DM Mono',monospace;font-size:15px;font-weight:500;color:var(--ok)">RMB 14,317</span>
+                </div>
+                <div class="flex-between" style="margin-top:4px">
+                  <span class="col-sec" style="font-size:10px">CFI subscription cost / vehicle / year</span>
+                  <span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text-secondary)">RMB 2,484</span>
+                </div>
+                <div class="flex-between" style="margin-top:2px">
+                  <span style="font-size:10px;font-weight:600;color:var(--ok)">Net saving / vehicle / year</span>
+                  <span style="font-family:'DM Mono',monospace;font-size:13px;font-weight:600;color:var(--ok)">RMB 11,833</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Compliance timeline + weekly actions -->
+      <div class="grid-2">
+
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">ESG Compliance Roadmap</span>
+            <span class="card-badge" style="color:var(--bronze)">68% to Silver</span>
+          </div>
+          <div class="card-body">
+            <div class="timeline">
+              <div class="timeline-item"><div class="tl-dot done"></div><div><p class="tl-label">CFI Activated · Sensors Deployed</p><p class="tl-date">Jan 2026 · Completed</p></div></div>
+              <div class="timeline-item"><div class="tl-dot done"></div><div><p class="tl-label">Michelin ESG Bronze Achieved</p><p class="tl-date">Mar 2026 · Score: 847 pts</p></div></div>
+              <div class="timeline-item"><div class="tl-dot active"></div><div><p class="tl-label" style="color:var(--bronze)">Reducing fleet to 42 gCO₂ — Silver Target</p><p class="tl-date">In Progress · Est. Sep 2026</p></div></div>
+              <div class="timeline-item"><div class="tl-dot next"></div><div><p class="tl-label col-sec">2026 Mandatory ESG Disclosure</p><p class="tl-date">Dec 2026 · GRI 305/306 auto-generated</p></div></div>
+              <div class="timeline-item"><div class="tl-dot next"></div><div><p class="tl-label col-sec">Michelin ESG Green Star — ≤35 gCO₂</p><p class="tl-date">2027 Target</p></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">This Week's Top Actions</span>
+            <span class="card-badge">CFI Recommended</span>
+          </div>
+          <div class="card-body">
+            <div class="action-cards">
+              <div class="action-card crit">
+                <div class="ac-header">
+                  <span class="ac-title">① Schedule HVL-2201 Retreading</span>
+                  <span class="badge badge-crit">URGENT</span>
+                </div>
+                <p class="ac-body">Smart Predictive detects 94% failure probability in 6 days. Retreading now saves est. RMB 18,400 in downtime costs.</p>
+                <p class="ac-impact">Impact: +8 ESG pts · RMB 18.4K saved · 28kg CO₂ avoided</p>
+              </div>
+              <div class="action-card warn">
+                <div class="ac-header">
+                  <span class="ac-title">② Reroute 3 Beijing–Wuhan Vehicles</span>
+                  <span class="badge badge-warn">HIGH IMPACT</span>
+                </div>
+                <p class="ac-body">G4 alternative reduces intensity 49.8 → 44.1 gCO₂. Brings 3 vehicles within Silver range.</p>
+                <p class="ac-impact">Impact: +18 ESG pts · −4.2 gCO₂ · 14 CCER credits</p>
+              </div>
+              <div class="action-card info">
+                <div class="ac-header">
+                  <span class="ac-title">③ Submit Q2 CCER Application</span>
+                  <span class="badge badge-info">THIS WEEK</span>
+                </div>
+                <p class="ac-body">1,847t CO₂e verified. Blockchain audit trail complete. Est. RMB 143,000 on Beijing Green Exchange.</p>
+                <p class="ac-impact">Impact: RMB 143K · Auto-submitted via CCER API</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════
+         PAGE 2 — FLEET MONITOR (SVG China Map)
+    ══════════════════════════════════════════════════════ -->
+    <section class="page-panel" id="page-fleet-monitor">
+
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Fleet <em>Monitor</em></h1>
+          <p class="page-meta">847 vehicles · Real-time positions · 9 active alerts</p>
+        </div>
+        <div class="header-actions">
+          <button class="btn btn-ghost" onclick="alert('Fleet report export simulated')">Export Report</button>
+        </div>
+      </div>
+
+      <!-- China SVG map -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Live Fleet Map — China</span>
+          <div class="flex-row gap-4">
+            <span class="card-badge" style="color:var(--crit)">● 3 Critical</span>
+            <span class="card-badge" style="color:var(--warn)">● 6 Warning</span>
+            <span class="card-badge" style="color:var(--ok)">● 838 OK</span>
+          </div>
+        </div>
+        <div class="card-body" style="padding:0;position:relative">
+          <div class="map-wrap">
+            <!-- Floating tooltip shown on dot hover -->
+            <div class="map-tooltip" id="mapTooltip"></div>
+
+            <!-- ── CHINA SVG MAP ──────────────────────────────
+                 Stylised China outline paths (simplified but
+                 geographically recognisable). Dots represent
+                 vehicle clusters per city hub.
+            ─────────────────────────────────────────────── -->
+            <svg width="100%" viewBox="0 0 800 560" style="display:block;max-height:420px">
+              <rect width="800" height="560" fill="var(--surface-3)"/>
+              <!-- Subtle grid pattern -->
+              <defs>
+                <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                  <path d="M40 0L0 0 0 40" fill="none" stroke="var(--border)" stroke-width="0.5"/>
+                </pattern>
+              </defs>
+              <rect width="800" height="560" fill="url(#grid)"/>
+
+              <!-- ── MAINLAND CHINA body ── -->
+              <path d="M260,90 L290,75 L330,70 L370,65 L410,60 L450,62 L490,70 L530,80
+                       L560,95 L590,115 L610,140 L625,165 L635,195 L640,225 L638,255
+                       L630,280 L618,305 L600,325 L580,340 L560,355 L545,370 L535,390
+                       L530,415 L525,440 L515,460 L500,475 L482,488 L465,498 L448,505
+                       L430,510 L412,512 L395,510 L378,505 L360,498 L342,490 L326,480
+                       L310,468 L296,455 L284,440 L274,424 L266,408 L260,392 L252,375
+                       L244,358 L235,340 L224,320 L210,302 L196,285 L182,270 L170,255
+                       L160,240 L152,224 L146,208 L142,192 L140,176 L140,160 L143,145
+                       L148,132 L156,120 L166,110 L178,102 L192,96  L208,92 L225,89
+                       L242,88 Z"
+                    fill="var(--surface-2)" stroke="var(--border-2)" stroke-width="1.5"/>
+
+              <!-- ── Northeast (Manchuria) ── -->
+              <path d="M530,80 L560,65 L595,55 L625,52 L648,58 L662,72 L668,92
+                       L660,112 L640,128 L620,140 L610,140 L590,115 Z"
+                    fill="var(--surface-2)" stroke="var(--border)" stroke-width="1"/>
+
+              <!-- ── Northwest (Xinjiang/Plateau) ── -->
+              <path d="M140,160 L128,148 L112,135 L100,118 L98,100 L108,88
+                       L125,82 L148,80 L170,82 L190,88 L210,92 L225,89 L242,88
+                       L260,90 L248,96 L235,104 L220,114 L205,124 L192,136
+                       L180,148 L166,158 L152,164 Z"
+                    fill="var(--surface-2)" stroke="var(--border)" stroke-width="1"/>
+
+              <!-- ── Hainan Island ── -->
+              <ellipse cx="455" cy="538" rx="22" ry="13" fill="var(--surface-2)" stroke="var(--border)" stroke-width="1"/>
+
+              <!-- ── City labels ── -->
+              <g fill="var(--text-dim)" font-size="9" font-family="DM Mono,monospace">
+                <text x="505" y="173">Beijing</text>
+                <text x="510" y="276">Shanghai</text>
+                <text x="376" y="226">Xi'an</text>
+                <text x="308" y="264">Chengdu</text>
+                <text x="458" y="382">Guangzhou</text>
+                <text x="202" y="289">Chongqing</text>
+                <text x="453" y="228">Wuhan</text>
+                <text x="543" y="210">Tianjin</text>
+                <text x="183" y="324">Kunming</text>
+              </g>
+
+              <!-- ══════════════════════════════════════════════
+                   VEHICLE CLUSTER DOTS
+                   Colour = health:  green=OK · amber=warning · red=critical
+                   Size   = vehicles in cluster
+                   Events = hover shows tooltip, click shows detail alert
+              ════════════════════════════════════════════════ -->
+
+              <!-- Beijing — OK -->
+              <g style="cursor:pointer"
+                 onmouseenter="showMapTip(event,'Beijing Hub','142 vehicles','44.2 gCO₂/km','92% healthy','★ Bronze')"
+                 onmouseleave="hideMapTip()">
+                <circle cx="512" cy="166" r="13" fill="rgba(34,197,94,0.12)" stroke="rgba(34,197,94,0.45)" stroke-width="1.5"/>
+                <circle cx="512" cy="166" r="5"  fill="var(--ok)"/>
+                <text x="526" y="162" fill="var(--ok)" font-size="9" font-family="DM Mono,monospace">142</text>
+              </g>
+
+              <!-- Shanghai — OK -->
+              <g style="cursor:pointer"
+                 onmouseenter="showMapTip(event,'Shanghai Hub','198 vehicles','41.8 gCO₂/km','96% healthy','★ Bronze')"
+                 onmouseleave="hideMapTip()">
+                <circle cx="542" cy="265" r="16" fill="rgba(34,197,94,0.12)" stroke="rgba(34,197,94,0.45)" stroke-width="1.5"/>
+                <circle cx="542" cy="265" r="6"  fill="var(--ok)"/>
+                <text x="558" y="261" fill="var(--ok)" font-size="9" font-family="DM Mono,monospace">198</text>
+              </g>
+
+              <!-- Guangzhou — Warning -->
+              <g style="cursor:pointer"
+                 onmouseenter="showMapTip(event,'Guangzhou Hub','87 vehicles','52.1 gCO₂/km','78% healthy','★ Bronze')"
+                 onmouseleave="hideMapTip()">
+                <circle cx="488" cy="376" r="11" fill="rgba(196,122,58,0.12)" stroke="rgba(196,122,58,0.45)" stroke-width="1.5"/>
+                <circle cx="488" cy="376" r="4"  fill="var(--bronze)"/>
+                <text x="500" y="372" fill="var(--bronze)" font-size="9" font-family="DM Mono,monospace">87</text>
+              </g>
+
+              <!-- Chengdu — OK -->
+              <g style="cursor:pointer"
+                 onmouseenter="showMapTip(event,'Chengdu Hub','64 vehicles','46.3 gCO₂/km','89% healthy','★ Bronze')"
+                 onmouseleave="hideMapTip()">
+                <circle cx="332" cy="296" r="9" fill="rgba(34,197,94,0.12)" stroke="rgba(34,197,94,0.40)" stroke-width="1.5"/>
+                <circle cx="332" cy="296" r="4" fill="var(--ok)"/>
+                <text x="344" y="292" fill="var(--ok)" font-size="9" font-family="DM Mono,monospace">64</text>
+              </g>
+
+              <!-- Wuhan — Warning -->
+              <g style="cursor:pointer"
+                 onmouseenter="showMapTip(event,'Wuhan Hub','112 vehicles','49.8 gCO₂/km','72% healthy','★ Bronze')"
+                 onmouseleave="hideMapTip()">
+                <circle cx="472" cy="265" r="12" fill="rgba(251,191,36,0.10)" stroke="rgba(251,191,36,0.40)" stroke-width="1.5"/>
+                <circle cx="472" cy="265" r="5"  fill="var(--warn)"/>
+                <text x="485" y="261" fill="var(--warn)" font-size="9" font-family="DM Mono,monospace">112</text>
+              </g>
+
+              <!-- Xi'an — CRITICAL -->
+              <g style="cursor:pointer"
+                 onmouseenter="showMapTip(event,'Xi\'an Hub','78 vehicles — 1 CRITICAL','53.4 gCO₂/km','65% healthy','★ Bronze')"
+                 onmouseleave="hideMapTip()">
+                <circle cx="398" cy="226" r="11" fill="rgba(200,16,46,0.12)" stroke="rgba(200,16,46,0.45)" stroke-width="1.5"/>
+                <circle cx="398" cy="226" r="4"  fill="var(--red)"/>
+                <text x="410" y="222" fill="var(--crit)" font-size="9" font-family="DM Mono,monospace">78 !</text>
+              </g>
+
+              <!-- Tianjin — OK -->
+              <g style="cursor:pointer"
+                 onmouseenter="showMapTip(event,'Tianjin Hub','55 vehicles','43.1 gCO₂/km','94% healthy','★ Bronze')"
+                 onmouseleave="hideMapTip()">
+                <circle cx="525" cy="203" r="8" fill="rgba(34,197,94,0.12)" stroke="rgba(34,197,94,0.40)" stroke-width="1.5"/>
+                <circle cx="525" cy="203" r="3" fill="var(--ok)"/>
+                <text x="535" y="199" fill="var(--ok)" font-size="9" font-family="DM Mono,monospace">55</text>
+              </g>
+
+              <!-- Chongqing — OK -->
+              <g style="cursor:pointer"
+                 onmouseenter="showMapTip(event,'Chongqing Hub','48 vehicles','47.6 gCO₂/km','88% healthy','★ Bronze')"
+                 onmouseleave="hideMapTip()">
+                <circle cx="368" cy="316" r="8" fill="rgba(34,197,94,0.12)" stroke="rgba(34,197,94,0.40)" stroke-width="1.5"/>
+                <circle cx="368" cy="316" r="3" fill="var(--ok)"/>
+                <text x="378" y="312" fill="var(--ok)" font-size="9" font-family="DM Mono,monospace">48</text>
+              </g>
+
+              <!-- Kunming — Warning -->
+              <g style="cursor:pointer"
+                 onmouseenter="showMapTip(event,'Kunming Hub','38 vehicles','51.2 gCO₂/km','80% healthy','★ Bronze')"
+                 onmouseleave="hideMapTip()">
+                <circle cx="310" cy="378" r="8" fill="rgba(251,191,36,0.10)" stroke="rgba(251,191,36,0.38)" stroke-width="1.5"/>
+                <circle cx="310" cy="378" r="3" fill="var(--warn)"/>
+                <text x="320" y="374" fill="var(--warn)" font-size="9" font-family="DM Mono,monospace">38</text>
+              </g>
+
+              <!-- Lanzhou — Warning -->
+              <g style="cursor:pointer"
+                 onmouseenter="showMapTip(event,'Lanzhou Hub','25 vehicles','56.8 gCO₂/km','80% healthy','★ Bronze')"
+                 onmouseleave="hideMapTip()">
+                <circle cx="272" cy="213" r="7" fill="rgba(251,191,36,0.10)" stroke="rgba(251,191,36,0.38)" stroke-width="1.5"/>
+                <circle cx="272" cy="213" r="3" fill="var(--warn)"/>
+                <text x="282" y="209" fill="var(--warn)" font-size="9" font-family="DM Mono,monospace">25</text>
+              </g>
+
+              <!-- Legend -->
+              <g transform="translate(16,510)">
+                <rect width="230" height="36" rx="6" fill="rgba(0,0,0,0.45)" stroke="var(--border-2)" stroke-width="1"/>
+                <circle cx="16" cy="11" r="5" fill="var(--ok)"/>
+                <text x="26" y="15" fill="var(--text-secondary)" font-size="9" font-family="DM Mono,monospace">OK</text>
+                <circle cx="55" cy="11" r="5" fill="var(--warn)"/>
+                <text x="65" y="15" fill="var(--text-secondary)" font-size="9" font-family="DM Mono,monospace">Warning</text>
+                <circle cx="120" cy="11" r="5" fill="var(--red)"/>
+                <text x="130" y="15" fill="var(--text-secondary)" font-size="9" font-family="DM Mono,monospace">Critical</text>
+                <text x="10" y="30" fill="var(--text-dim)" font-size="8" font-family="DM Mono,monospace">Hover dots for cluster detail</text>
+              </g>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Full vehicle table -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">All Vehicles — Active Fleet</span>
+          <span class="card-badge">847 total · 15 shown · sorted by alert priority</span>
+        </div>
+        <div class="card-body" style="padding:10px 14px">
+          <table class="data-table">
+            <thead>
+              <tr><th>ID</th><th>Vehicle</th><th>Route</th><th>CO₂ Intensity</th><th>Tyre Health</th><th>Retreading</th><th>Alert</th><th>ESG Points</th></tr>
+            </thead>
+            <tbody id="fullVehicleBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════
+         PAGE 3 — CARBON LEDGER
+    ══════════════════════════════════════════════════════ -->
+    <section class="page-panel" id="page-carbon-ledger">
+
+      <div class="page-header">
+        <div>
+          <h1 class="page-title"><em>Carbon</em> Ledger</h1>
+          <p class="page-meta">Blockchain-immutable · GRI 305 Aligned · 24,841 verified entries</p>
+        </div>
+        <div class="header-actions">
+          <button class="btn btn-ghost" onclick="alert('Ledger PDF export simulated')">Export Ledger</button>
+          <button class="btn btn-primary" onclick="alert('Q2 CCER submission to Beijing Green Exchange API simulated')">Submit to CCER API</button>
+        </div>
+      </div>
+
+      <div class="grid-4">
+        <div class="kpi-card green">
+          <p class="kpi-label">Total CO₂ Recorded</p>
+          <p class="kpi-value">84,200t</p>
+          <p class="kpi-sub">sensor-verified · not estimated</p>
+        </div>
+        <div class="kpi-card gold">
+          <p class="kpi-label">CO₂ Avoided (Retreading)</p>
+          <p class="kpi-value">1,847t</p>
+          <p class="kpi-sub">vs new tyre manufacture</p>
+        </div>
+        <div class="kpi-card blue">
+          <p class="kpi-label">Ledger Entries</p>
+          <p class="kpi-value">24,841</p>
+          <p class="kpi-sub">this quarter · immutable</p>
+        </div>
+        <div class="kpi-card bronze">
+          <p class="kpi-label">Chain Integrity</p>
+          <p class="kpi-value">100%</p>
+          <p class="kpi-sub">all hashes verified · 0 tamper attempts</p>
+        </div>
+      </div>
+
+      <!-- Ledger table -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Ledger Entries — Carbon Events</span>
+          <div class="flex-row gap-4">
+            <span class="card-badge" style="color:var(--ok)">● Chain Verified</span>
+            <span class="card-badge">Showing 12 of 24,841</span>
+          </div>
+        </div>
+        <div class="card-body" style="padding:10px 14px">
+          <table class="data-table">
+            <thead>
+              <tr><th>Block #</th><th>Timestamp</th><th>Vehicle</th><th>Event Type</th><th>CO₂ Value</th><th>Distance</th><th>Hash</th><th>Status</th></tr>
+            </thead>
+            <tbody id="ledgerBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Event breakdown + chain stats -->
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Event Type Breakdown</span>
+            <span class="card-badge">Q2 2026</span>
+          </div>
+          <div class="card-body">
+            <div class="stream-list">
+              <div class="stream-row"><span class="stream-name">Route Completed</span><div style="flex:1"><div class="mini-bar-wrap"><div class="mini-bar-fill" style="width:78%;background:var(--blue)"></div></div></div><span class="stream-val">18,420</span></div>
+              <div class="stream-row"><span class="stream-name">Tyre Sensor Read</span><div style="flex:1"><div class="mini-bar-wrap"><div class="mini-bar-fill" style="width:62%;background:var(--ok)"></div></div></div><span class="stream-val">4,218</span></div>
+              <div class="stream-row"><span class="stream-name">Retreading Event</span><div style="flex:1"><div class="mini-bar-wrap"><div class="mini-bar-fill" style="width:20%;background:var(--bronze)"></div></div></div><span class="stream-val">1,240</span></div>
+              <div class="stream-row"><span class="stream-name">CCER Credit Issued</span><div style="flex:1"><div class="mini-bar-wrap"><div class="mini-bar-fill" style="width:8%;background:var(--gold)"></div></div></div><span class="stream-val">963</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Blockchain Integrity</span><span class="card-badge" style="color:var(--ok)">100% Verified</span></div>
+          <div class="card-body" style="display:flex;flex-direction:column;gap:9px">
+            <div class="flex-between"><span class="col-sec" style="font-size:11px">Consensus algorithm</span><span class="td-num">SHA-256 PoA</span></div>
+            <div class="flex-between"><span class="col-sec" style="font-size:11px">Chain height</span><span class="td-num">Block #24,841</span></div>
+            <div class="flex-between"><span class="col-sec" style="font-size:11px">Last block time</span><span class="td-num">2 min ago</span></div>
+            <div class="flex-between"><span class="col-sec" style="font-size:11px">Data host</span><span class="td-num">Alibaba Cloud · CN East</span></div>
+            <div class="flex-between"><span class="col-sec" style="font-size:11px">PIPL compliance</span><span class="badge badge-ok">✓ Compliant</span></div>
+            <div class="flex-between"><span class="col-sec" style="font-size:11px">Tamper attempts</span><span class="td-num col-ok">0 detected</span></div>
+            <div class="flex-between"><span class="col-sec" style="font-size:11px">Audit trail</span><span class="badge badge-ok">✓ GRI 305 Ready</span></div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════
+         PAGE 4 — ESG REPORTS
+    ══════════════════════════════════════════════════════ -->
+    <section class="page-panel" id="page-esg-reports">
+
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">ESG <em>Reports</em></h1>
+          <p class="page-meta">GRI 305 · GRI 306 · Auto-generated from Carbon Ledger · Audit-ready</p>
+        </div>
+        <div class="header-actions">
+          <button class="btn btn-ghost" onclick="alert('Q2 2026 GRI 305 report generated from Carbon Ledger')">Generate GRI 305</button>
+          <button class="btn btn-primary" onclick="alert('ESG Certificate download — blockchain-referenced signed PDF')">Download Certificate</button>
+        </div>
+      </div>
+
+      <div class="grid-4">
+        <div class="kpi-card red"><p class="kpi-label">Scope 1 Emissions</p><p class="kpi-value">12,480t</p><p class="kpi-sub">direct fleet emissions</p><p class="kpi-delta delta-good">↓ 8.2% vs Q1</p></div>
+        <div class="kpi-card blue"><p class="kpi-label">Scope 3 Emissions</p><p class="kpi-value">41,820t</p><p class="kpi-sub">indirect — tyre lifecycle</p><p class="kpi-delta delta-good">↓ 14.6% vs baseline</p></div>
+        <div class="kpi-card green"><p class="kpi-label">Waste Diverted (GRI 306)</p><p class="kpi-value">184t</p><p class="kpi-sub">tyres retreaded vs landfill</p><p class="kpi-delta delta-good">↑ 22% vs Q1</p></div>
+        <div class="kpi-card bronze"><p class="kpi-label">Reporting Completeness</p><p class="kpi-value">98.4%</p><p class="kpi-sub">data coverage across fleet</p><p class="kpi-delta delta-good">Audit-ready</p></div>
+      </div>
+
+      <!-- Downloadable report library -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Report Library — Downloadable</span>
+          <span class="card-badge">All auto-generated from Carbon Ledger</span>
+        </div>
+        <div class="card-body">
+          <div class="report-grid">
+            <div class="report-card" onclick="alert('GRI 305 Emissions Report Q2 2026 — download simulated')"><div class="report-icon">📊</div><div class="report-name">GRI 305 — Emissions</div><div class="report-sub">Q2 2026 · Scope 1 + 3</div><span class="badge badge-ok">Ready</span></div>
+            <div class="report-card" onclick="alert('GRI 306 Waste Report Q2 2026 — download simulated')"><div class="report-icon">♻️</div><div class="report-name">GRI 306 — Waste</div><div class="report-sub">Q2 2026 · Tyre lifecycle</div><span class="badge badge-ok">Ready</span></div>
+            <div class="report-card" onclick="alert('Michelin ESG Bronze Certificate — blockchain ref #4821')"><div class="report-icon">★</div><div class="report-name">ESG Bronze Certificate</div><div class="report-sub">Mar 2026 · Ref: #4821</div><span class="badge badge-bronze">★ Bronze</span></div>
+            <div class="report-card" onclick="alert('Carbon Ledger audit export — 24,841 SHA-256 entries')"><div class="report-icon">🔗</div><div class="report-name">Blockchain Audit Trail</div><div class="report-sub">24,841 entries · Verified</div><span class="badge badge-ok">Verified</span></div>
+            <div class="report-card" onclick="alert('CCER Credit Statement Q2 2026 — RMB 143K')"><div class="report-icon">💹</div><div class="report-name">CCER Credit Statement</div><div class="report-sub">Q2 2026 · RMB 143K value</div><span class="badge badge-info">Pending</span></div>
+            <div class="report-card" onclick="alert('TCO Savings Report YTD 2026 — RMB 2.4M saved')"><div class="report-icon">📉</div><div class="report-name">TCO Savings Report</div><div class="report-sub">YTD 2026 · RMB 2.4M saved</div><span class="badge badge-ok">Ready</span></div>
+            <div class="report-card" onclick="alert('2026 Mandatory ESG Disclosure Pack — CSRC format')"><div class="report-icon">🏛️</div><div class="report-name">2026 Mandatory Disclosure</div><div class="report-sub">CSRC format · Dec 2026 due</div><span class="badge badge-warn">In Progress</span></div>
+            <div class="report-card" onclick="alert('Industry Benchmark Report — vs China average 61 gCO₂')"><div class="report-icon">📈</div><div class="report-name">Benchmark Report</div><div class="report-sub">vs China fleet avg 61 gCO₂</div><span class="badge badge-ok">Ready</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- GRI alignment matrix -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">GRI Standard Alignment Matrix</span>
+          <span class="card-badge">Auto-populated from Carbon Ledger</span>
+        </div>
+        <div class="card-body" style="padding:10px 14px">
+          <table class="data-table">
+            <thead><tr><th>GRI Standard</th><th>Disclosure Item</th><th>CFI Data Source</th><th>Coverage</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>GRI 305-1</td><td>Direct (Scope 1) GHG emissions</td><td>Sensor: fuel × emission factor</td><td class="td-num col-ok">100%</td><td><span class="badge badge-ok">Auto</span></td></tr>
+              <tr><td>GRI 305-3</td><td>Other indirect (Scope 3) emissions</td><td>Tyre lifecycle × vehicle distance</td><td class="td-num col-ok">98.4%</td><td><span class="badge badge-ok">Auto</span></td></tr>
+              <tr><td>GRI 305-4</td><td>GHG emissions intensity</td><td>Carbon Ledger per-vehicle gCO₂/km</td><td class="td-num col-ok">100%</td><td><span class="badge badge-ok">Auto</span></td></tr>
+              <tr><td>GRI 305-5</td><td>Reduction of GHG emissions</td><td>Retreading savings vs new manufacture</td><td class="td-num col-ok">100%</td><td><span class="badge badge-ok">Auto</span></td></tr>
+              <tr><td>GRI 306-2</td><td>Management of significant waste</td><td>Tyre end-of-life ledger entries</td><td class="td-num col-bronze">94.1%</td><td><span class="badge badge-warn">Partial</span></td></tr>
+              <tr><td>GRI 306-4</td><td>Waste diverted from disposal</td><td>Retreading × rubber recovered weight</td><td class="td-num col-ok">100%</td><td><span class="badge badge-ok">Auto</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════
+         PAGE 5 — RETREADING
+    ══════════════════════════════════════════════════════ -->
+    <section class="page-panel" id="page-retreading">
+
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Tyre <em>Retreading</em></h1>
+          <p class="page-meta">Circular loop engine · 30% cost · 65% sell price · Michelin China HDL</p>
+        </div>
+        <div class="header-actions">
+          <button class="btn btn-ghost" onclick="alert('Retreading schedule export simulated')">Export Schedule</button>
+          <button class="btn btn-primary" onclick="alert('Michelin Retreading Centre booking form simulated')">Book Retreading Slot</button>
+        </div>
+      </div>
+
+      <div class="grid-4">
+        <div class="kpi-card green"><p class="kpi-label">Retreads This Quarter</p><p class="kpi-value">1,240</p><p class="kpi-sub">tyres processed</p><p class="kpi-delta delta-good">↑ 18% vs Q1</p></div>
+        <div class="kpi-card bronze"><p class="kpi-label">Your Tyre Cost Saving</p><p class="kpi-value">RMB 1.67M</p><p class="kpi-sub">retreaded vs new · 1,240 tyres Q2</p><p class="kpi-delta delta-good">RMB 1,347 saved per tyre</p></div>
+        <div class="kpi-card blue"><p class="kpi-label">Oil Saved</p><p class="kpi-value">86,800L</p><p class="kpi-sub">vs new tyre manufacture</p><p class="kpi-delta delta-good">70L per tyre · 1,240 retreads</p></div>
+        <div class="kpi-card gold"><p class="kpi-label">CO₂ Avoided</p><p class="kpi-value">37.2t</p><p class="kpi-sub">30kg per retread vs new</p><p class="kpi-delta delta-good">CCER eligible</p></div>
+      </div>
+
+      <!-- Tyre lifecycle stages visual -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Tyre Lifecycle — Circular Model</span>
+          <span class="card-badge">Smart Predictive triggered</span>
+        </div>
+        <div class="card-body">
+          <div class="lifecycle-bar">
+            <div class="lc-stage">① Michelin Tyre Fitted</div>
+            <div class="lc-stage">② Sensor Monitoring</div>
+            <div class="lc-stage lc-active">③ Threshold Predicted</div>
+            <div class="lc-stage">④ Michelin Retreading Centre</div>
+            <div class="lc-stage">⑤ Retread Fitted</div>
+            <div class="lc-stage">⑥ Repeat × 3 cycles</div>
+          </div>
+          <p style="font-size:10px;color:var(--text-secondary);margin-top:9px">
+            Each Michelin casing engineered for 3+ retread cycles · Chinese competitor casings: typically 1 cycle only
+          </p>
+        </div>
+      </div>
+
+      <!-- Retreading queue table -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Retreading Queue &amp; History</span>
+          <span class="card-badge">84 tyres eligible now</span>
+        </div>
+        <div class="card-body" style="padding:10px 14px">
+          <table class="data-table">
+            <thead><tr><th>Tyre ID</th><th>Vehicle</th><th>Position</th><th>Wear %</th><th>Predicted Failure</th><th>Retread Cycle</th><th>Status</th><th>CO₂ Avoided</th></tr></thead>
+            <tbody id="retreadBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Economics + environmental -->
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header"><span class="card-title">Your Retreading Savings</span><span class="card-badge">Q2 2026 · 847 vehicles</span></div>
+          <div class="card-body" style="display:flex;flex-direction:column;gap:9px">
+            <div class="flex-between"><span class="col-sec" style="font-size:11px">Tyres retreaded Q2 2026</span><span class="td-num">1,240 tyres</span></div>
+            <div class="flex-between"><span class="col-sec" style="font-size:11px">New tyre cost (market)</span><span class="td-num">RMB 3,850/tyre</span></div>
+            <div class="flex-between"><span class="col-sec" style="font-size:11px">Retreaded tyre cost (65% of new)</span><span class="td-num col-ok">RMB 2,503/tyre</span></div>
+            <div class="flex-between"><span class="col-sec" style="font-size:11px">Your saving per tyre</span><span class="td-num col-bronze">RMB 1,347</span></div>
+            <div class="divider"></div>
+            <div class="flex-between"><span class="col-sec" style="font-size:11px">Total retreading saving Q2</span><span class="td-num col-bronze" style="font-size:14px">RMB 1,670,280</span></div>
+            <div class="flex-between"><span class="col-sec" style="font-size:11px">Annualised saving (run rate)</span><span class="td-num col-bronze">RMB 6.7M / yr</span></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Environmental Impact</span><span class="card-badge">vs new manufacture</span></div>
+          <div class="card-body" style="display:flex;flex-direction:column;gap:9px">
+            <div class="flex-between"><span class="col-sec" style="font-size:11px">CO₂ avoided per retread</span><span class="td-num col-ok">~30 kg</span></div>
+            <div class="flex-between"><span class="col-sec" style="font-size:11px">Oil saved per retread</span><span class="td-num col-ok">68–72 L</span></div>
+            <div class="flex-between"><span class="col-sec" style="font-size:11px">Rubber recovered per retread</span><span class="td-num col-ok">~6 kg</span></div>
+            <div class="divider"></div>
+            <div class="flex-between"><span class="col-sec" style="font-size:11px">Q2 CO₂ avoided (1,240 retreads)</span><span class="td-num col-ok">37.2t CO₂</span></div>
+            <div class="flex-between"><span class="col-sec" style="font-size:11px">CCER credit value (RMB 80/t)</span><span class="td-num col-gold">RMB 2,976</span></div>
+            <div class="flex-between"><span class="col-sec" style="font-size:11px">GRI 306 waste diverted</span><span class="badge badge-ok">✓ Reported</span></div>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════
+         PAGE 6 — CCER CREDITS
+    ══════════════════════════════════════════════════════ -->
+    <section class="page-panel" id="page-ccer-credits">
+
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">CCER <em>Credits</em></h1>
+          <p class="page-meta">China Certified Emission Reduction · Beijing Green Exchange · Relaunched Jan 2024</p>
+        </div>
+        <div class="header-actions">
+          <button class="btn btn-ghost" onclick="alert('CCER portfolio statement download simulated')">Download Statement</button>
+          <button class="btn btn-primary" onclick="alert('963 credits queued — submission to Beijing Green Exchange simulated')">Submit to Exchange</button>
+        </div>
+      </div>
+
+      <div class="grid-4">
+        <div class="kpi-card gold"><p class="kpi-label">Credits Earned (Q2)</p><p class="kpi-value">963</p><p class="kpi-sub">tonnes CO₂e verified</p><p class="kpi-delta delta-good">↑ 23% vs Q1</p></div>
+        <div class="kpi-card green"><p class="kpi-label">Credits Pending</p><p class="kpi-value">1,847</p><p class="kpi-sub">awaiting exchange submission</p></div>
+        <div class="kpi-card bronze"><p class="kpi-label">Estimated Value</p><p class="kpi-value">RMB 143K</p><p class="kpi-sub">at RMB 80/tonne CO₂e</p><p class="kpi-delta delta-good">Market rate stable</p></div>
+        <div class="kpi-card blue"><p class="kpi-label">Credits Traded YTD</p><p class="kpi-value">2,840</p><p class="kpi-sub">RMB 227K realised</p><p class="kpi-delta delta-good">All intensity-based</p></div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header"><span class="card-title">Credit Sources</span><span class="card-badge">CCER Verified</span></div>
+          <div class="card-body">
+            <div class="stream-list">
+              <div class="stream-row"><span class="stream-name">Route Optimisation</span><div style="flex:1"><div class="mini-bar-wrap"><div class="mini-bar-fill" style="width:55%;background:var(--blue)"></div></div></div><span class="stream-val">1,014t</span></div>
+              <div class="stream-row"><span class="stream-name">Tyre Pressure Opt.</span><div style="flex:1"><div class="mini-bar-wrap"><div class="mini-bar-fill" style="width:30%;background:var(--ok)"></div></div></div><span class="stream-val">554t</span></div>
+              <div class="stream-row"><span class="stream-name">Retreading (Michelin)</span><div style="flex:1"><div class="mini-bar-wrap"><div class="mini-bar-fill" style="width:22%;background:var(--bronze)"></div></div></div><span class="stream-val">37t</span></div>
+              <div class="stream-row"><span class="stream-name">Predictive Maintenance</span><div style="flex:1"><div class="mini-bar-wrap"><div class="mini-bar-fill" style="width:15%;background:var(--gold)"></div></div></div><span class="stream-val">242t</span></div>
+              <div class="divider"></div>
+              <div class="flex-between"><span class="col-sec" style="font-size:11px">Total pending</span><span class="td-num col-gold" style="font-size:14px">1,847t · RMB 143K</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Exchange Status</span><span class="card-badge">Beijing Green Exchange</span></div>
+          <div class="card-body" style="display:flex;flex-direction:column;gap:9px">
+            <div class="flex-between"><span class="col-sec" style="font-size:11px">API Connection</span><span class="badge badge-ok">✓ Live</span></div>
+            <div class="flex-between"><span class="col-sec" style="font-size:11px">Market price</span><span class="td-num col-gold">RMB 80/tonne</span></div>
+            <div class="flex-between"><span class="col-sec" style="font-size:11px">Methodology type</span><span class="td-num">Intensity-based</span></div>
+            <div class="flex-between"><span class="col-sec" style="font-size:11px">Verification standard</span><span class="td-num">CCER v2 · NDRC</span></div>
+            <div class="flex-between"><span class="col-sec" style="font-size:11px">PIPL compliance</span><span class="badge badge-ok">✓ Compliant</span></div>
+            <div class="flex-between"><span class="col-sec" style="font-size:11px">Ledger reference</span><span class="td-num col-dim" style="font-size:10px">Block #24,841 · SHA-256</span></div>
+            <div class="divider"></div>
+            <div style="background:var(--gold-dim);border:1px solid rgba(245,158,11,0.2);border-radius:7px;padding:10px">
+              <p style="font-size:10px;color:var(--text-secondary);line-height:1.5">
+                <strong style="color:var(--gold)">Intensity-based advantage:</strong>
+                Credits earned on gCO₂ per vehicle·km improvement — fleet can grow volume and still earn credits as long as intensity decreases.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CCER transaction history -->
+      <div class="card">
+        <div class="card-header"><span class="card-title">Credit Transaction History</span><span class="card-badge">Beijing Green Exchange · 2026</span></div>
+        <div class="card-body" style="padding:10px 14px">
+          <table class="data-table">
+            <thead><tr><th>Date</th><th>Credits (tCO₂e)</th><th>Price (RMB/t)</th><th>Total Value</th><th>Source</th><th>Status</th><th>Ledger Ref</th></tr></thead>
+            <tbody id="ccerBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════
+         PAGE 7 — COST SAVINGS REPORT
+         Synthesises retreading, fuel, downtime, CCER, and
+         compliance savings into one CFO-readable financial summary.
+    ══════════════════════════════════════════════════════ -->
+    <section class="page-panel" id="page-cost-savings">
+
+      <div class="page-header">
+        <div>
+          <h1 class="page-title">Cost <em>Savings</em> Report</h1>
+          <p class="page-meta">Q2 2026 · NorthStar Logistics Group · 847 vehicles · CFI-driven savings</p>
+        </div>
+        <div class="header-actions">
+          <button class="btn btn-ghost" onclick="downloadSavingsReport()">Export PDF Report</button>
+          <button class="btn btn-primary" onclick="alert('CFI Board Summary generated — ready to share with CFO')">Share with CFO</button>
+        </div>
+      </div>
+
+      <!-- ── HEADLINE TOTAL SAVINGS ── -->
+      <div class="grid-4">
+
+        <div class="kpi-card red">
+          <p class="kpi-label">Total Savings — Q2 2026</p>
+          <p class="kpi-value">RMB 2.94M</p>
+          <p class="kpi-sub">across all five saving streams</p>
+          <p class="kpi-delta delta-good">↑ 22% vs Q1 2026</p>
+        </div>
+
+        <div class="kpi-card green">
+          <p class="kpi-label">TCO Reduction (YTD)</p>
+          <p class="kpi-value">16.8%</p>
+          <p class="kpi-sub">vs pre-CFI baseline · RMB 2.4M saved</p>
+          <p class="kpi-delta delta-good">Target: 15% guaranteed</p>
+        </div>
+
+        <div class="kpi-card bronze">
+          <p class="kpi-label">Return on CFI Investment</p>
+          <p class="kpi-value">4.2×</p>
+          <p class="kpi-sub">RMB saved per RMB spent on CFI</p>
+          <p class="kpi-delta delta-good">Break-even: Month 3 of pilot</p>
+        </div>
+
+        <div class="kpi-card blue">
+          <p class="kpi-label">Annualised Savings Run Rate</p>
+          <p class="kpi-value">RMB 11.8M</p>
+          <p class="kpi-sub">projected full-year savings (Q2 × 4)</p>
+          <p class="kpi-delta delta-good">Based on Q2 trajectory</p>
+        </div>
+
+      </div>
+
+      <!-- ── FIVE SAVING STREAMS BREAKDOWN ── -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Five Saving Streams — Q2 2026</span>
+          <span class="card-badge">All figures sensor-verified · Blockchain-referenced</span>
+        </div>
+        <div class="card-body" style="padding:10px 14px">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Saving Stream</th>
+                <th>How It Works</th>
+                <th>Q2 Quantity</th>
+                <th>Unit Value</th>
+                <th>Q2 Saving</th>
+                <th>vs Q1</th>
+              </tr>
+            </thead>
+            <tbody id="savingsStreamsBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ── RETREADING DEEP DIVE + DOWNTIME ── -->
+      <div class="grid-2">
+
+        <!-- Retreading savings calculator -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Retreading Savings — Detailed Breakdown</span>
+            <span class="card-badge" style="color:var(--bronze)">Stream 1 · Largest saving</span>
+          </div>
+          <div class="card-body">
+
+            <!-- Visual comparison: new tyre vs retreaded -->
+            <div style="display:flex;gap:10px;margin-bottom:14px">
+              <div style="flex:1;background:var(--crit-dim);border:1px solid rgba(220,38,38,0.18);border-radius:7px;padding:12px;text-align:center">
+                <p style="font-size:9px;font-weight:700;color:var(--crit);letter-spacing:0.08em;margin-bottom:4px">NEW TYRE COST</p>
+                <p style="font-family:'DM Mono',monospace;font-size:22px;font-weight:500;color:var(--crit)">RMB 3,850</p>
+                <p style="font-size:9px;color:var(--text-secondary);margin-top:2px">per tyre · market price</p>
+              </div>
+              <div style="display:flex;align-items:center;font-size:18px;color:var(--text-dim);font-weight:300">→</div>
+              <div style="flex:1;background:var(--ok-dim);border:1px solid rgba(34,197,94,0.22);border-radius:7px;padding:12px;text-align:center">
+                <p style="font-size:9px;font-weight:700;color:var(--ok);letter-spacing:0.08em;margin-bottom:4px">RETREADED TYRE COST</p>
+                <p style="font-family:'DM Mono',monospace;font-size:22px;font-weight:500;color:var(--ok)">RMB 2,503</p>
+                <p style="font-size:9px;color:var(--text-secondary);margin-top:2px">65% of new · same warranty</p>
+              </div>
+              <div style="display:flex;align-items:center;font-size:18px;color:var(--text-dim);font-weight:300">=</div>
+              <div style="flex:1;background:var(--bronze-dim);border:1px solid var(--bronze-border);border-radius:7px;padding:12px;text-align:center">
+                <p style="font-size:9px;font-weight:700;color:var(--bronze);letter-spacing:0.08em;margin-bottom:4px">SAVING PER TYRE</p>
+                <p style="font-family:'DM Mono',monospace;font-size:22px;font-weight:500;color:var(--bronze)">RMB 1,347</p>
+                <p style="font-size:9px;color:var(--text-secondary);margin-top:2px">35% saved vs new purchase</p>
+              </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <!-- Quarterly totals -->
+            <div style="display:flex;flex-direction:column;gap:7px;margin-top:10px">
+              <div class="flex-between">
+                <span style="font-size:11px;color:var(--text-secondary)">Tyres retreaded Q2 2026</span>
+                <span class="td-num">1,240 tyres</span>
+              </div>
+              <div class="flex-between">
+                <span style="font-size:11px;color:var(--text-secondary)">Saving per tyre vs new</span>
+                <span class="td-num col-bronze">RMB 1,347</span>
+              </div>
+              <div class="flex-between">
+                <span style="font-size:11px;color:var(--text-secondary)">Total retreading saving Q2</span>
+                <span class="td-num" style="font-size:14px;color:var(--bronze);font-weight:600">RMB 1,670,280</span>
+              </div>
+              <div class="divider"></div>
+              <div class="flex-between">
+                <span style="font-size:11px;color:var(--text-secondary)">CO₂ avoided (30kg per retread)</span>
+                <span class="td-num col-ok">37.2 tonnes CO₂</span>
+              </div>
+              <div class="flex-between">
+                <span style="font-size:11px;color:var(--text-secondary)">Oil saved (70L per retread)</span>
+                <span class="td-num col-ok">86,800 litres</span>
+              </div>
+              <div class="flex-between">
+                <span style="font-size:11px;color:var(--text-secondary)">Rubber diverted from landfill</span>
+                <span class="td-num col-ok">7,440 kg</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Downtime avoided -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Downtime Avoided — Predictive Alerts</span>
+            <span class="card-badge" style="color:var(--ok)">Stream 2 · Smart Predictive Tyre</span>
+          </div>
+          <div class="card-body">
+            <p style="font-size:10px;color:var(--text-secondary);margin-bottom:12px;line-height:1.5">
+              Smart Predictive Tyre detected 84 tyre failures before they occurred this quarter.
+              Each avoided breakdown eliminates vehicle recovery, roadside repair, and missed delivery SLA costs.
+            </p>
+
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div class="flex-between">
+                <span style="font-size:11px;color:var(--text-secondary)">Predictive alerts acted on</span>
+                <span class="td-num">84 alerts</span>
+              </div>
+              <div class="flex-between">
+                <span style="font-size:11px;color:var(--text-secondary)">Breakdown events avoided</span>
+                <span class="td-num col-ok">71 events</span>
+              </div>
+              <div class="flex-between">
+                <span style="font-size:11px;color:var(--text-secondary)">Avg cost per breakdown (industry)</span>
+                <span class="td-num">RMB 12,400</span>
+              </div>
+              <div style="background:var(--ok-dim);border:1px solid rgba(34,197,94,0.22);border-radius:5px;padding:10px;margin-top:4px">
+                <div class="flex-between">
+                  <span style="font-size:11px;color:var(--ok);font-weight:600">Total downtime cost avoided Q2</span>
+                  <span style="font-family:'DM Mono',monospace;font-size:14px;color:var(--ok);font-weight:600">RMB 880,400</span>
+                </div>
+              </div>
+              <div class="divider"></div>
+              <div class="flex-between">
+                <span style="font-size:11px;color:var(--text-secondary)">Recovery vehicle costs avoided</span>
+                <span class="td-num col-ok">RMB 213,000</span>
+              </div>
+              <div class="flex-between">
+                <span style="font-size:11px;color:var(--text-secondary)">SLA penalty exposure avoided</span>
+                <span class="td-num col-ok">RMB 426,000</span>
+              </div>
+              <div class="flex-between">
+                <span style="font-size:11px;color:var(--text-secondary)">Driver overtime avoided (est.)</span>
+                <span class="td-num col-ok">RMB 241,400</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ── FUEL, CCER, COMPLIANCE SAVINGS ── -->
+      <div class="grid-4" style="grid-template-columns:repeat(3,1fr)">
+
+        <!-- Fuel saving -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Fuel Efficiency Saving</span>
+            <span class="card-badge" style="color:var(--blue)">Stream 3</span>
+          </div>
+          <div class="card-body">
+            <p style="font-size:10px;color:var(--text-secondary);margin-bottom:10px;line-height:1.5">
+              Optimised tyre pressure maintained by Smart Predictive Tyre reduces rolling resistance.
+              2.8% average fuel saving vs unmanaged fleet baseline.
+            </p>
+            <div style="display:flex;flex-direction:column;gap:7px">
+              <div class="flex-between">
+                <span style="font-size:11px;color:var(--text-secondary)">Fleet fuel use Q2 (est.)</span>
+                <span class="td-num">842,000 L</span>
+              </div>
+              <div class="flex-between">
+                <span style="font-size:11px;color:var(--text-secondary)">Reduction vs baseline</span>
+                <span class="td-num col-blue">2.8%</span>
+              </div>
+              <div class="flex-between">
+                <span style="font-size:11px;color:var(--text-secondary)">Fuel saved</span>
+                <span class="td-num col-blue">23,576 L</span>
+              </div>
+              <div class="flex-between">
+                <span style="font-size:11px;color:var(--text-secondary)">Diesel price (RMB/L)</span>
+                <span class="td-num">RMB 7.84</span>
+              </div>
+              <div class="divider"></div>
+              <div class="flex-between">
+                <span style="font-size:11px;font-weight:600;color:var(--blue)">Fuel saving Q2</span>
+                <span style="font-family:'DM Mono',monospace;font-size:13px;color:var(--blue);font-weight:600">RMB 184,836</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CCER revenue -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">CCER Credit Revenue</span>
+            <span class="card-badge" style="color:var(--gold)">Stream 4</span>
+          </div>
+          <div class="card-body">
+            <p style="font-size:10px;color:var(--text-secondary);margin-bottom:10px;line-height:1.5">
+              Intensity-based carbon credits earned through verified CO₂ reduction.
+              Submitted to Beijing Green Exchange. Revenue from ESG compliance — not a cost.
+            </p>
+            <div style="display:flex;flex-direction:column;gap:7px">
+              <div class="flex-between">
+                <span style="font-size:11px;color:var(--text-secondary)">Credits pending Q2</span>
+                <span class="td-num">1,847 tCO₂e</span>
+              </div>
+              <div class="flex-between">
+                <span style="font-size:11px;color:var(--text-secondary)">CCER price (Beijing Exchange)</span>
+                <span class="td-num">RMB 80/t</span>
+              </div>
+              <div class="flex-between">
+                <span style="font-size:11px;color:var(--text-secondary)">Credits traded YTD</span>
+                <span class="td-num col-gold">2,840 tCO₂e</span>
+              </div>
+              <div class="flex-between">
+                <span style="font-size:11px;color:var(--text-secondary)">YTD CCER revenue realised</span>
+                <span class="td-num col-gold">RMB 227,000</span>
+              </div>
+              <div class="divider"></div>
+              <div class="flex-between">
+                <span style="font-size:11px;font-weight:600;color:var(--gold)">Q2 CCER value pending</span>
+                <span style="font-family:'DM Mono',monospace;font-size:13px;color:var(--gold);font-weight:600">RMB 147,760</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ESG compliance cost avoided -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">ESG Compliance Cost Avoided</span>
+            <span class="card-badge" style="color:var(--tier-green)">Stream 5</span>
+          </div>
+          <div class="card-body">
+            <p style="font-size:10px;color:var(--text-secondary);margin-bottom:10px;line-height:1.5">
+              CFI auto-generates GRI 305/306 reports from the Carbon Ledger. Manual ESG reporting
+              via consultancy costs RMB 80–150K per operator per year. CFI replaces this entirely.
+            </p>
+            <div style="display:flex;flex-direction:column;gap:7px">
+              <div class="flex-between">
+                <span style="font-size:11px;color:var(--text-secondary)">Manual ESG audit cost (market)</span>
+                <span class="td-num">RMB 120,000/yr</span>
+              </div>
+              <div class="flex-between">
+                <span style="font-size:11px;color:var(--text-secondary)">Manual data collection (est.)</span>
+                <span class="td-num">RMB 80,000/yr</span>
+              </div>
+              <div class="flex-between">
+                <span style="font-size:11px;color:var(--text-secondary)">CSRC filing preparation</span>
+                <span class="td-num">RMB 40,000/yr</span>
+              </div>
+              <div class="flex-between">
+                <span style="font-size:11px;color:var(--text-secondary)">CFI auto-generates all three</span>
+                <span class="badge badge-ok">✓ Included</span>
+              </div>
+              <div class="divider"></div>
+              <div class="flex-between">
+                <span style="font-size:11px;font-weight:600;color:var(--tier-green)">Compliance cost avoided (annualised)</span>
+                <span style="font-family:'DM Mono',monospace;font-size:13px;color:var(--tier-green);font-weight:600">RMB 240,000</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ── TOTAL SAVINGS WATERFALL + ROI ── -->
+      <div class="grid-2">
+
+        <!-- Waterfall summary -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Q2 2026 — Total Savings Waterfall</span>
+            <span class="card-badge">All five streams combined</span>
+          </div>
+          <div class="card-body">
+            <div class="stream-list">
+
+              <div class="stream-row">
+                <span class="stream-name">1. Retreading vs new</span>
+                <div style="flex:1"><div class="mini-bar-wrap"><div class="mini-bar-fill" style="width:100%;background:var(--bronze)"></div></div></div>
+                <span class="stream-val col-bronze">RMB 1,670K</span>
+              </div>
+
+              <div class="stream-row">
+                <span class="stream-name">2. Downtime avoided</span>
+                <div style="flex:1"><div class="mini-bar-wrap"><div class="mini-bar-fill" style="width:53%;background:var(--ok)"></div></div></div>
+                <span class="stream-val col-ok">RMB 880K</span>
+              </div>
+
+              <div class="stream-row">
+                <span class="stream-name">3. Fuel efficiency</span>
+                <div style="flex:1"><div class="mini-bar-wrap"><div class="mini-bar-fill" style="width:11%;background:var(--blue)"></div></div></div>
+                <span class="stream-val col-blue">RMB 185K</span>
+              </div>
+
+              <div class="stream-row">
+                <span class="stream-name">4. CCER credits</span>
+                <div style="flex:1"><div class="mini-bar-wrap"><div class="mini-bar-fill" style="width:9%;background:var(--gold)"></div></div></div>
+                <span class="stream-val col-gold">RMB 148K</span>
+              </div>
+
+              <div class="stream-row">
+                <span class="stream-name">5. Compliance avoided</span>
+                <div style="flex:1"><div class="mini-bar-wrap"><div class="mini-bar-fill" style="width:14%;background:var(--tier-green))"></div></div></div>
+                <span class="stream-val col-green">RMB 60K*</span>
+              </div>
+
+              <div class="divider"></div>
+              <div class="flex-between" style="margin-top:4px">
+                <span style="font-size:12px;font-weight:600">Total Q2 2026</span>
+                <span style="font-family:'DM Mono',monospace;font-size:18px;font-weight:600;color:var(--red)">RMB 2,943K</span>
+              </div>
+              <p style="font-size:8px;color:var(--text-dim);margin-top:4px">*Q2 quarterly portion of annualised RMB 240K compliance saving</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ROI and payback card -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">CFI Return on Investment</span>
+            <span class="card-badge" style="color:var(--ok)">CFO Summary</span>
+          </div>
+          <div class="card-body">
+
+            <!-- ROI visual -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+              <div style="background:var(--ok-dim);border:1px solid rgba(34,197,94,0.22);border-radius:7px;padding:12px;text-align:center">
+                <p style="font-size:9px;color:var(--ok);font-weight:700;letter-spacing:0.06em;margin-bottom:4px">GROSS SAVING Q2</p>
+                <p style="font-family:'DM Mono',monospace;font-size:20px;font-weight:500;color:var(--ok)">RMB 2,943K</p>
+                <p style="font-size:9px;color:var(--text-secondary);margin-top:2px">across all five streams</p>
+              </div>
+              <div style="background:var(--surface-3);border:1px solid var(--border);border-radius:7px;padding:12px;text-align:center">
+                <p style="font-size:9px;color:var(--text-secondary);font-weight:700;letter-spacing:0.06em;margin-bottom:4px">CFI FEE Q2</p>
+                <p style="font-family:'DM Mono',monospace;font-size:20px;font-weight:500;color:var(--text-secondary)">RMB 701K</p>
+                <p style="font-size:9px;color:var(--text-dim);margin-top:2px">RMB 217/veh/month × 847 veh</p>
+              </div>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div class="flex-between">
+                <span style="font-size:11px;color:var(--text-secondary)">Return on CFI investment (Q2)</span>
+                <span style="font-family:'DM Mono',monospace;font-size:15px;font-weight:600;color:var(--ok)">4.2×</span>
+              </div>
+              <div class="flex-between">
+                <span style="font-size:11px;color:var(--text-secondary)">Net saving after CFI fee</span>
+                <span class="td-num col-ok">RMB 2,242K</span>
+              </div>
+              <div class="flex-between">
+                <span style="font-size:11px;color:var(--text-secondary)">Annualised net saving (Q2 × 4)</span>
+                <span class="td-num" style="color:var(--red);font-size:13px">RMB 8.97M/yr</span>
+              </div>
+              <div class="flex-between">
+                <span style="font-size:11px;color:var(--text-secondary)">Break-even on CFI fee</span>
+                <span class="badge badge-ok">✓ Month 3</span>
+              </div>
+              <div class="flex-between">
+                <span style="font-size:11px;color:var(--text-secondary)">TCO reduction vs baseline</span>
+                <span class="td-num col-ok">16.8%</span>
+              </div>
+
+              <div class="divider"></div>
+
+              <!-- Projection to Phase 2 -->
+              <p style="font-size:9px;color:var(--text-secondary);font-weight:700;letter-spacing:0.06em">IF YOUR FLEET GROWS TO 5,000 VEHICLES</p>
+              <div class="flex-between">
+                <span style="font-size:11px;color:var(--text-secondary)">Retreading saving alone</span>
+                <span class="td-num col-bronze">RMB 98.6M/yr</span>
+              </div>
+              <div class="flex-between">
+                <span style="font-size:11px;color:var(--text-secondary)">Total estimated saving</span>
+                <span class="td-num" style="color:var(--red);font-size:13px;font-weight:600">RMB 174M/yr</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ── TREND CHART + VEHICLE BREAKDOWN ── -->
+      <div class="grid-2">
+
+        <!-- Quarterly savings trend -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Quarterly Savings Trend</span>
+            <span class="card-badge">RMB · All streams</span>
+          </div>
+          <div class="card-body">
+            <svg width="100%" height="140" viewBox="0 0 460 140" preserveAspectRatio="none">
+              <!-- Grid lines -->
+              <line x1="0" y1="20"  x2="460" y2="20"  stroke="var(--border)" stroke-width="0.5"/>
+              <line x1="0" y1="55"  x2="460" y2="55"  stroke="var(--border)" stroke-width="0.5"/>
+              <line x1="0" y1="90"  x2="460" y2="90"  stroke="var(--border)" stroke-width="0.5"/>
+              <line x1="0" y1="125" x2="460" y2="125" stroke="var(--border)" stroke-width="0.5"/>
+              <!-- Y labels -->
+              <text x="2" y="17"  fill="var(--text-dim)" font-size="8" font-family="DM Mono,monospace">4M</text>
+              <text x="2" y="52"  fill="var(--text-dim)" font-size="8" font-family="DM Mono,monospace">3M</text>
+              <text x="2" y="87"  fill="var(--text-dim)" font-size="8" font-family="DM Mono,monospace">2M</text>
+              <text x="2" y="122" fill="var(--text-dim)" font-size="8" font-family="DM Mono,monospace">1M</text>
+              <!-- Stacked bars per quarter -->
+              <!-- Q3 2025 -->
+              <rect x="55"  y="108" width="40" height="17" fill="var(--bronze)" opacity="0.85"/>
+              <rect x="55"  y="92"  width="40" height="16" fill="var(--ok)"     opacity="0.85"/>
+              <rect x="55"  y="85"  width="40" height="7"  fill="var(--blue)"   opacity="0.85"/>
+              <rect x="55"  y="80"  width="40" height="5"  fill="var(--gold)"   opacity="0.85"/>
+              <text x="75" y="138" fill="var(--text-dim)" font-size="8" font-family="DM Mono,monospace" text-anchor="middle">Q3 25</text>
+              <!-- Q4 2025 -->
+              <rect x="125" y="96"  width="40" height="29" fill="var(--bronze)" opacity="0.85"/>
+              <rect x="125" y="75"  width="40" height="21" fill="var(--ok)"     opacity="0.85"/>
+              <rect x="125" y="67"  width="40" height="8"  fill="var(--blue)"   opacity="0.85"/>
+              <rect x="125" y="61"  width="40" height="6"  fill="var(--gold)"   opacity="0.85"/>
+              <text x="145" y="138" fill="var(--text-dim)" font-size="8" font-family="DM Mono,monospace" text-anchor="middle">Q4 25</text>
+              <!-- Q1 2026 -->
+              <rect x="195" y="79"  width="40" height="46" fill="var(--bronze)" opacity="0.85"/>
+              <rect x="195" y="58"  width="40" height="21" fill="var(--ok)"     opacity="0.85"/>
+              <rect x="195" y="50"  width="40" height="8"  fill="var(--blue)"   opacity="0.85"/>
+              <rect x="195" y="44"  width="40" height="6"  fill="var(--gold)"   opacity="0.85"/>
+              <rect x="195" y="38"  width="40" height="6"  fill="var(--tier-green)" opacity="0.85"/>
+              <text x="215" y="138" fill="var(--text-dim)" font-size="8" font-family="DM Mono,monospace" text-anchor="middle">Q1 26</text>
+              <!-- Q2 2026 — current, highlighted -->
+              <rect x="280" y="59"  width="50" height="66" fill="var(--bronze)"/>
+              <rect x="280" y="36"  width="50" height="23" fill="var(--ok)"/>
+              <rect x="280" y="28"  width="50" height="8"  fill="var(--blue)"/>
+              <rect x="280" y="22"  width="50" height="6"  fill="var(--gold)"/>
+              <rect x="280" y="16"  width="50" height="6"  fill="var(--tier-green)"/>
+              <!-- Highlight ring -->
+              <rect x="278" y="14" width="54" height="113" fill="none" stroke="var(--red)" stroke-width="1.5"/>
+              <text x="305" y="138" fill="var(--red)" font-size="8" font-family="DM Mono,monospace" text-anchor="middle" font-weight="bold">Q2 26 ★</text>
+              <!-- Target line -->
+              <line x1="40" y1="37" x2="460" y2="37" stroke="var(--red)" stroke-width="1" stroke-dasharray="4,3" opacity="0.4"/>
+              <text x="395" y="33" fill="var(--red)" font-size="7.5" font-family="DM Mono,monospace" opacity="0.6">Target: 4M</text>
+            </svg>
+            <!-- Legend -->
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px">
+              <span style="font-size:8px;display:flex;align-items:center;gap:3px;color:var(--text-secondary)">
+                <span style="width:8px;height:8px;background:var(--bronze);display:inline-block;border-radius:1px"></span>Retreading
+              </span>
+              <span style="font-size:8px;display:flex;align-items:center;gap:3px;color:var(--text-secondary)">
+                <span style="width:8px;height:8px;background:var(--ok);display:inline-block;border-radius:1px"></span>Downtime
+              </span>
+              <span style="font-size:8px;display:flex;align-items:center;gap:3px;color:var(--text-secondary)">
+                <span style="width:8px;height:8px;background:var(--blue);display:inline-block;border-radius:1px"></span>Fuel
+              </span>
+              <span style="font-size:8px;display:flex;align-items:center;gap:3px;color:var(--text-secondary)">
+                <span style="width:8px;height:8px;background:var(--gold);display:inline-block;border-radius:1px"></span>CCER
+              </span>
+              <span style="font-size:8px;display:flex;align-items:center;gap:3px;color:var(--text-secondary)">
+                <span style="width:8px;height:8px;background:var(--tier-green);display:inline-block;border-radius:1px"></span>Compliance
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Top saving vehicles -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">Top Saving Vehicles — Q2 2026</span>
+            <span class="card-badge">Ranked by total saving</span>
+          </div>
+          <div class="card-body" style="padding:10px 14px">
+            <table class="data-table">
+              <thead>
+                <tr><th>Vehicle</th><th>Retreading</th><th>Downtime</th><th>Fuel</th><th>Total Q2</th></tr>
+              </thead>
+              <tbody id="topSavingsBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════
+     FOOTER BAR
+════════════════════════════════════════════════════════════ -->
+<footer class="footer-bar">
+  <div>
+    <span class="proto-tag">PROTOTYPE</span>
+    Carbon Fleet Intelligence (CFI) · Michelin Smart Predictive Tyre · PIPL Compliant · Alibaba Cloud
+  </div>
+  <span>GRI 305 · GRI 306 · CCER API · Blockchain Carbon Ledger</span>
+  <span>© 2026 CFI · INNOVATEChina Concept</span>
+</footer>
+
+<!-- ════════════════════════════════════════════════════════════
+     JAVASCRIPT — Theme, Navigation, Data, Rendering
+════════════════════════════════════════════════════════════ -->
+<script>
+/* ════════════════════════════════════════════════════════════
+   THEME TOGGLE
+   Switches [data-theme] on <html> between "dark" and "light".
+   Updates the toggle button label accordingly.
+════════════════════════════════════════════════════════════ */
+function toggleTheme() {
+  const html = document.documentElement;
+  const btn  = document.getElementById('themeBtn');
+  if (html.getAttribute('data-theme') === 'dark') {
+    html.setAttribute('data-theme', 'light');
+    btn.textContent = '🌙 Dark Mode';
+  } else {
+    html.setAttribute('data-theme', 'dark');
+    btn.textContent = '☀️ Light Mode';
+  }
+}
+
+/* ════════════════════════════════════════════════════════════
+   PAGE SWITCHING
+   Hides all .page-panel sections and shows the target one.
+   Also syncs the topbar nav buttons and sidebar items.
+════════════════════════════════════════════════════════════ */
+function switchPage(pageId, clickedBtn) {
+  // 1. Hide all panels
+  document.querySelectorAll('.page-panel').forEach(p => p.classList.remove('active'));
+
+  // 2. Show the target panel
+  const panel = document.getElementById('page-' + pageId);
+  if (panel) panel.classList.add('active');
+
+  // 3. Update topbar button active states
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  if (clickedBtn) {
+    clickedBtn.classList.add('active');
+  } else {
+    const match = document.querySelector(`.nav-btn[data-page="${pageId}"]`);
+    if (match) match.classList.add('active');
+  }
+
+  // 4. Update sidebar item active states
+  document.querySelectorAll('.sidebar-item').forEach(item => {
+    item.classList.remove('active');
+    const onclick = item.getAttribute('onclick') || '';
+    if (onclick.includes(`'${pageId}'`)) item.classList.add('active');
+  });
+
+  // 5. Scroll content area back to top
+  const ca = document.querySelector('.content-area');
+  if (ca) ca.scrollTop = 0;
+}
+
+/* ════════════════════════════════════════════════════════════
+   MAP TOOLTIP — show / hide on hover over vehicle cluster dots
+════════════════════════════════════════════════════════════ */
+function showMapTip(event, hub, vehicles, co2, health, tier) {
+  const tip = document.getElementById('mapTooltip');
+  tip.innerHTML = `
+    <div class="mtt-name">${hub}</div>
+    <div class="mtt-row"><span class="mtt-label">Vehicles</span><span class="mtt-val">${vehicles}</span></div>
+    <div class="mtt-row"><span class="mtt-label">Avg CO₂</span><span class="mtt-val">${co2}</span></div>
+    <div class="mtt-row"><span class="mtt-label">Health</span><span class="mtt-val">${health}</span></div>
+    <div class="mtt-row"><span class="mtt-label">ESG Tier</span><span class="mtt-val" style="color:var(--bronze)">${tier}</span></div>
+  `;
+  tip.classList.add('visible');
+
+  // Position relative to map container, keeping inside viewport
+  const wrap = document.querySelector('.map-wrap');
+  const rect = wrap.getBoundingClientRect();
+  let x = event.clientX - rect.left + 14;
+  let y = event.clientY - rect.top  + 14;
+  if (x + 200 > rect.width)  x -= 220;
+  if (y + 130 > rect.height) y -= 140;
+  tip.style.left = x + 'px';
+  tip.style.top  = y + 'px';
+}
+
+function hideMapTip() {
+  document.getElementById('mapTooltip').classList.remove('visible');
+}
+
+/* ════════════════════════════════════════════════════════════
+   HARD-CODED DATA SETS
+   In production these would be fetched from the CFI API.
+   Data is intentionally separated from HTML markup so it can
+   be swapped for real API calls without touching the UI.
+════════════════════════════════════════════════════════════ */
+
+/* ── Vehicle data (used in both overview preview and full table) ── */
+const VEHICLES = [
+  { id:'001', name:'HVL-2201', route:"Shenzhen → Xi'an",     co2:61.4, health:41,  retread:'🔴 Urgent',    alert:'URGENT', alertCls:'badge-crit', pts:'—'    },
+  { id:'002', name:'HVL-3307', route:'Beijing → Wuhan',       co2:49.8, health:72,  retread:'⚠ Due soon',  alert:'WORN',   alertCls:'badge-warn', pts:'+89'  },
+  { id:'003', name:'HVL-1142', route:'Tianjin → Lanzhou',     co2:55.2, health:58,  retread:'⚠ 3 weeks',   alert:'WARN',   alertCls:'badge-warn', pts:'+42'  },
+  { id:'004', name:'HVL-4821', route:'Shanghai → Chengdu',    co2:41.2, health:94,  retread:'Aug 2026',    alert:'OK',     alertCls:'badge-ok',   pts:'+124' },
+  { id:'005', name:'HVL-7743', route:'Tianjin → Kunming',     co2:43.1, health:88,  retread:'Sep 2026',    alert:'OK',     alertCls:'badge-ok',   pts:'+111' },
+  { id:'006', name:'HVL-9912', route:'Guangzhou → Chongqing', co2:38.6, health:97,  retread:'Oct 2026',    alert:'OK',     alertCls:'badge-ok',   pts:'+156' },
+  { id:'007', name:'HVL-5588', route:'Wuhan → Beijing',       co2:44.7, health:85,  retread:'Aug 2026',    alert:'OK',     alertCls:'badge-ok',   pts:'+98'  },
+  { id:'008', name:'HVL-6612', route:"Xi'an → Chengdu",       co2:47.3, health:76,  retread:'⚠ 5 weeks',   alert:'WARN',   alertCls:'badge-warn', pts:'+74'  },
+  { id:'009', name:'HVL-3301', route:'Shanghai → Tianjin',    co2:40.8, health:91,  retread:'Nov 2026',    alert:'OK',     alertCls:'badge-ok',   pts:'+132' },
+  { id:'010', name:'HVL-8847', route:'Kunming → Wuhan',       co2:42.2, health:90,  retread:'Sep 2026',    alert:'OK',     alertCls:'badge-ok',   pts:'+118' },
+  { id:'011', name:'HVL-2290', route:'Chengdu → Shanghai',    co2:39.4, health:95,  retread:'Oct 2026',    alert:'OK',     alertCls:'badge-ok',   pts:'+142' },
+  { id:'012', name:'HVL-7109', route:'Guangzhou → Beijing',   co2:50.6, health:68,  retread:'⚠ 4 weeks',   alert:'WORN',   alertCls:'badge-warn', pts:'+63'  },
+  { id:'013', name:'HVL-4402', route:'Beijing → Chengdu',     co2:45.1, health:83,  retread:'Sep 2026',    alert:'OK',     alertCls:'badge-ok',   pts:'+105' },
+  { id:'014', name:'HVL-1837', route:'Wuhan → Guangzhou',     co2:43.8, health:87,  retread:'Oct 2026',    alert:'OK',     alertCls:'badge-ok',   pts:'+112' },
+  { id:'015', name:'HVL-9023', route:'Tianjin → Kunming',     co2:44.0, health:89,  retread:'Nov 2026',    alert:'OK',     alertCls:'badge-ok',   pts:'+108' },
+];
+
+/* ── Ledger entries ── */
+const LEDGER = [
+  { block:'24841', time:'2026-04-07 14:22', vehicle:'HVL-4821', type:'Route Completed',    co2:'41.2 g/km', dist:'842 km',   hash:'0x4f8a2c…e921' },
+  { block:'24840', time:'2026-04-07 14:18', vehicle:'HVL-7743', type:'Tyre Sensor Read',   co2:'43.1 g/km', dist:'—',         hash:'0x9d1b7e…a34f' },
+  { block:'24839', time:'2026-04-07 14:15', vehicle:'HVL-2201', type:'Alert Generated',    co2:'61.4 g/km', dist:'—',         hash:'0x2e8c4a…f802' },
+  { block:'24838', time:'2026-04-07 13:58', vehicle:'HVL-9912', type:'Route Completed',    co2:'38.6 g/km', dist:'1,240 km', hash:'0x7a3f9d…c418' },
+  { block:'24837', time:'2026-04-07 13:44', vehicle:'HVL-3307', type:'Retreading Booked',  co2:'—',          dist:'—',         hash:'0x1c6b2e…8d74' },
+  { block:'24836', time:'2026-04-07 13:30', vehicle:'HVL-5588', type:'CCER Credit Issued', co2:'−12.4t',     dist:'—',         hash:'0x8f4a1c…2b90' },
+  { block:'24835', time:'2026-04-07 13:21', vehicle:'HVL-1837', type:'Route Completed',    co2:'43.8 g/km', dist:'1,120 km', hash:'0x3d7c8a…f156' },
+  { block:'24834', time:'2026-04-07 13:08', vehicle:'HVL-6612', type:'Tyre Sensor Read',   co2:'47.3 g/km', dist:'—',         hash:'0x6e2d4f…a822' },
+  { block:'24833', time:'2026-04-07 12:55', vehicle:'HVL-4402', type:'Route Completed',    co2:'45.1 g/km', dist:'960 km',   hash:'0x0b9e3d…7c41' },
+  { block:'24832', time:'2026-04-07 12:40', vehicle:'HVL-3301', type:'Route Completed',    co2:'40.8 g/km', dist:'1,480 km', hash:'0x5a7f2e…d309' },
+  { block:'24831', time:'2026-04-07 12:28', vehicle:'HVL-2290', type:'Retreading Complete', co2:'−30 kg',   dist:'—',         hash:'0xce4b8a…1f62' },
+  { block:'24830', time:'2026-04-07 12:15', vehicle:'HVL-8847', type:'Route Completed',    co2:'42.2 g/km', dist:'780 km',   hash:'0x4d1c7b…e540' },
+];
+
+/* ── Retreading queue ── */
+const RETREADS = [
+  { id:'TYR-8821', vehicle:'HVL-2201', pos:'Rear-Left',  wear:'41%', failure:'6 days',  cycle:'1st', status:'URGENT',    sts:'badge-crit', co2:'30kg' },
+  { id:'TYR-4407', vehicle:'HVL-3307', pos:'Front-Right',wear:'28%', failure:'3 weeks', cycle:'2nd', status:'DUE SOON',  sts:'badge-warn', co2:'30kg' },
+  { id:'TYR-6612', vehicle:'HVL-6612', pos:'Rear-Right', wear:'24%', failure:'5 weeks', cycle:'1st', status:'SCHEDULED', sts:'badge-info', co2:'30kg' },
+  { id:'TYR-1142', vehicle:'HVL-1142', pos:'Front-Left', wear:'22%', failure:'6 weeks', cycle:'3rd', status:'SCHEDULED', sts:'badge-info', co2:'30kg' },
+  { id:'TYR-7109', vehicle:'HVL-7109', pos:'Rear-Left',  wear:'18%', failure:'8 weeks', cycle:'2nd', status:'MONITOR',   sts:'badge-muted',co2:'30kg' },
+  { id:'TYR-9023', vehicle:'HVL-9023', pos:'Front-Right',wear:'12%', failure:'12 wks',  cycle:'1st', status:'MONITOR',   sts:'badge-muted',co2:'30kg' },
+  { id:'TYR-2290', vehicle:'HVL-2290', pos:'All 6',      wear:'0%',  failure:'—',       cycle:'Done',status:'COMPLETE',  sts:'badge-ok',   co2:'30kg' },
+  { id:'TYR-8331', vehicle:'HVL-8847', pos:'Rear-Right', wear:'10%', failure:'14 wks',  cycle:'1st', status:'MONITOR',   sts:'badge-muted',co2:'30kg' },
+];
+
+/* ── CCER transactions ── */
+const CCER_TX = [
+  { date:'2026-04-01', credits:'324', price:'80', total:'RMB 25,920', source:'Route optimisation',        status:'Submitted', sts:'badge-warn' },
+  { date:'2026-03-15', credits:'218', price:'78', total:'RMB 17,004', source:'Tyre pressure optimisation', status:'Traded',    sts:'badge-ok'   },
+  { date:'2026-03-01', credits:'180', price:'76', total:'RMB 13,680', source:'Route optimisation',        status:'Traded',    sts:'badge-ok'   },
+  { date:'2026-02-15', credits:'142', price:'75', total:'RMB 10,650', source:'Predictive maintenance',    status:'Traded',    sts:'badge-ok'   },
+  { date:'2026-02-01', credits:'99',  price:'74', total:'RMB 7,326',  source:'Tyre pressure optimisation', status:'Traded',   sts:'badge-ok'   },
+  { date:'2026-01-15', credits:'37',  price:'72', total:'RMB 2,664',  source:'Retreading (Michelin)',     status:'Traded',    sts:'badge-ok'   },
+  { date:'2026-01-01', credits:'88',  price:'71', total:'RMB 6,248',  source:'Route optimisation',        status:'Traded',    sts:'badge-ok'   },
+  { date:'2025-12-15', credits:'112', price:'70', total:'RMB 7,840',  source:'Predictive maintenance',    status:'Traded',    sts:'badge-ok'   },
+];
+
+/* ════════════════════════════════════════════════════════════
+   TABLE RENDERERS
+   Each reads from its data array and injects HTML into a <tbody>.
+   Colours are applied via CSS custom properties — they auto-update
+   when the theme toggles, so no special dark/light handling needed.
+════════════════════════════════════════════════════════════ */
+
+/* Helper — pick CO₂ colour class based on value */
+function co2Class(val) {
+  if (val <= 42) return 'col-green';
+  if (val <= 50) return 'col-bronze';
+  if (val <= 55) return '';
+  return 'col-red';
+}
+
+/* Overview table — 5 rows */
+function renderOverviewVehicles() {
+  const tbody = document.getElementById('overviewVehicleBody');
+  if (!tbody) return;
+  tbody.innerHTML = VEHICLES.slice(0, 5).map(v => {
+    const hc = v.health >= 90 ? 'var(--ok)' : v.health >= 65 ? 'var(--bronze)' : 'var(--crit)';
+    return `
+      <tr onclick="switchPage('fleet-monitor',null)">
+        <td class="td-num col-dim">${v.id}</td>
+        <td><div class="td-main">${v.name}</div></td>
+        <td class="td-num ${co2Class(v.co2)}">${v.co2} g</td>
+        <td>
+          <div class="mini-bar-wrap"><div class="mini-bar-fill" style="width:${v.health}%;background:${hc}"></div></div>
+          <div style="font-size:9px;color:${hc};margin-top:2px">${v.health}%</div>
+        </td>
+        <td><span class="badge ${v.alertCls}">${v.alert}</span></td>
+        <td class="td-num col-bronze">${v.pts}</td>
+      </tr>`;
+  }).join('');
+}
+
+/* Full vehicle table — all 15 rows */
+function renderFullVehicles() {
+  const tbody = document.getElementById('fullVehicleBody');
+  if (!tbody) return;
+  tbody.innerHTML = VEHICLES.map(v => {
+    const hc = v.health >= 90 ? 'var(--ok)' : v.health >= 65 ? 'var(--bronze)' : 'var(--crit)';
+    return `
+      <tr>
+        <td class="td-num col-dim">${v.id}</td>
+        <td><div class="td-main">${v.name}</div></td>
+        <td class="col-sec" style="font-size:11px">${v.route}</td>
+        <td class="td-num ${co2Class(v.co2)}">${v.co2} g</td>
+        <td>
+          <div class="mini-bar-wrap"><div class="mini-bar-fill" style="width:${v.health}%;background:${hc}"></div></div>
+          <div style="font-size:9px;color:${hc};margin-top:2px">${v.health}%</div>
+        </td>
+        <td class="col-sec" style="font-size:11px">${v.retread}</td>
+        <td><span class="badge ${v.alertCls}">${v.alert}</span></td>
+        <td class="td-num col-bronze">${v.pts}</td>
+      </tr>`;
+  }).join('');
+}
+
+/* Carbon ledger table */
+function renderLedger() {
+  const tbody = document.getElementById('ledgerBody');
+  if (!tbody) return;
+  tbody.innerHTML = LEDGER.map(e => {
+    // Colour the event type label by category
+    let tc = '';
+    if (e.type.includes('Alert'))    tc = 'col-red';
+    if (e.type.includes('CCER'))     tc = 'col-gold';
+    if (e.type.includes('Retread'))  tc = 'col-bronze';
+    if (e.type.includes('Route'))    tc = 'col-blue';
+    if (e.type.includes('Sensor'))   tc = 'col-ok';
+    return `
+      <tr>
+        <td class="td-num col-dim">#${e.block}</td>
+        <td class="td-num" style="font-size:10px">${e.time}</td>
+        <td class="td-num">${e.vehicle}</td>
+        <td class="${tc}" style="font-size:11px;font-weight:500">${e.type}</td>
+        <td class="td-num">${e.co2}</td>
+        <td class="td-num">${e.dist}</td>
+        <td>
+          <div style="display:flex;align-items:center;gap:5px">
+            <div style="width:6px;height:6px;border-radius:50%;background:var(--ok);flex-shrink:0"></div>
+            <span class="chain-hash">${e.hash}</span>
+          </div>
+        </td>
+        <td><span class="badge badge-ok">✓ Verified</span></td>
+      </tr>`;
+  }).join('');
+}
+
+/* Retreading table */
+function renderRetread() {
+  const tbody = document.getElementById('retreadBody');
+  if (!tbody) return;
+  tbody.innerHTML = RETREADS.map(t => `
+    <tr>
+      <td class="td-num col-dim">${t.id}</td>
+      <td class="td-num">${t.vehicle}</td>
+      <td class="col-sec" style="font-size:11px">${t.pos}</td>
+      <td class="td-num">${t.wear}</td>
+      <td class="td-num" style="${t.failure === '6 days' ? 'color:var(--crit)' : 'color:var(--text-secondary)'}">${t.failure}</td>
+      <td class="td-num col-bronze">${t.cycle}</td>
+      <td><span class="badge ${t.sts}">${t.status}</span></td>
+      <td class="td-num col-ok">${t.co2}</td>
+    </tr>`).join('');
+}
+
+/* CCER transactions table */
+function renderCcer() {
+  const tbody = document.getElementById('ccerBody');
+  if (!tbody) return;
+  tbody.innerHTML = CCER_TX.map(c => `
+    <tr>
+      <td class="td-num col-dim">${c.date}</td>
+      <td class="td-num col-gold">${c.credits} t</td>
+      <td class="td-num">RMB ${c.price}/t</td>
+      <td class="td-num col-gold" style="font-weight:500">${c.total}</td>
+      <td class="col-sec" style="font-size:11px">${c.source}</td>
+      <td><span class="badge ${c.sts}">${c.status}</span></td>
+      <td class="td-num col-dim" style="font-size:10px">Ledger #${24000 + Math.floor(Math.random()*800)}</td>
+    </tr>`).join('');
+}
+
+/* ════════════════════════════════════════════════════════════
+   COST SAVINGS DATA
+   Five saving streams with quarterly figures and supporting math.
+   In production these would be calculated from live Carbon Ledger data.
+════════════════════════════════════════════════════════════ */
+
+const SAVINGS_STREAMS = [
+  {
+    num: '01',
+    name: 'Retreading vs New Tyre Purchase',
+    how: 'Michelin retreaded tyre = 65% of new tyre price. Same casing warranty.',
+    qty: '1,240 tyres',
+    unit: 'RMB 1,347/tyre saved',
+    q2: 'RMB 1,670,280',
+    vsQ1: '+18%',
+    good: true,
+  },
+  {
+    num: '02',
+    name: 'Unplanned Downtime Avoided',
+    how: 'Smart Predictive Tyre detected 84 failures before they occurred. 71 breakdown events avoided.',
+    qty: '71 events',
+    unit: 'RMB 12,400/event',
+    q2: 'RMB 880,400',
+    vsQ1: '+31%',
+    good: true,
+  },
+  {
+    num: '03',
+    name: 'Fuel Efficiency Gain',
+    how: 'Optimised tyre pressure reduces rolling resistance. 2.8% fuel saving vs unmanaged baseline.',
+    qty: '23,576 L saved',
+    unit: 'RMB 7.84/L diesel',
+    q2: 'RMB 184,836',
+    vsQ1: '+9%',
+    good: true,
+  },
+  {
+    num: '04',
+    name: 'CCER Carbon Credits',
+    how: 'Intensity-based credits earned through verified CO₂ reduction. Traded on Beijing Green Exchange.',
+    qty: '1,847 tCO₂e',
+    unit: 'RMB 80/tonne',
+    q2: 'RMB 147,760',
+    vsQ1: '+23%',
+    good: true,
+  },
+  {
+    num: '05',
+    name: 'ESG Compliance Cost Avoided',
+    how: 'CFI auto-generates GRI 305/306 and CSRC reports. Replaces RMB 240K/yr in consultancy fees.',
+    qty: 'Full year avoided',
+    unit: 'RMB 240,000/yr',
+    q2: 'RMB 60,000',
+    vsQ1: 'New stream',
+    good: true,
+  },
+];
+
+/* Top saving vehicles */
+const TOP_SAVINGS = [
+  { id: 'HVL-9912', retread: 'RMB 8,082', downtime: 'RMB 24,800', fuel: 'RMB 1,240', total: 'RMB 34,122' },
+  { id: 'HVL-4821', retread: 'RMB 8,082', downtime: 'RMB 12,400', fuel: 'RMB 1,184', total: 'RMB 21,666' },
+  { id: 'HVL-7743', retread: 'RMB 5,388', downtime: 'RMB 12,400', fuel: 'RMB 1,210', total: 'RMB 18,998' },
+  { id: 'HVL-3301', retread: 'RMB 8,082', downtime: 'RMB 0',      fuel: 'RMB 1,196', total: 'RMB 9,278' },
+  { id: 'HVL-2290', retread: 'RMB 5,388', downtime: 'RMB 0',      fuel: 'RMB 1,166', total: 'RMB 6,554' },
+  { id: 'HVL-5588', retread: 'RMB 0',     downtime: 'RMB 0',      fuel: 'RMB 1,226', total: 'RMB 1,226' },
+];
+
+/* ── RENDER: savings streams table ── */
+function renderSavingsStreams() {
+  const tbody = document.getElementById('savingsStreamsBody');
+  if (!tbody) return;
+  tbody.innerHTML = SAVINGS_STREAMS.map(s => `
+    <tr>
+      <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--text-dim)">${s.num}</td>
+      <td>
+        <div style="font-size:12px;font-weight:600;color:var(--text-primary)">${s.name}</div>
+      </td>
+      <td style="font-size:9.5px;color:var(--text-secondary);max-width:160px">${s.how}</td>
+      <td class="td-num">${s.qty}</td>
+      <td style="font-size:9.5px;color:var(--text-secondary)">${s.unit}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:12px;font-weight:600;color:var(--ok)">${s.q2}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:10px;color:${s.vsQ1.startsWith('+') ? 'var(--ok)' : 'var(--text-secondary)'}">${s.vsQ1}</td>
+    </tr>`).join('');
+}
+
+/* ── RENDER: top saving vehicles ── */
+function renderTopSavings() {
+  const tbody = document.getElementById('topSavingsBody');
+  if (!tbody) return;
+  tbody.innerHTML = TOP_SAVINGS.map(v => `
+    <tr>
+      <td style="font-family:'DM Mono',monospace;font-weight:600">${v.id}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:10px;color:var(--bronze)">${v.retread}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:10px;color:var(--ok)">${v.downtime}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:10px;color:var(--blue)">${v.fuel}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:12px;font-weight:600;color:var(--red)">${v.total}</td>
+    </tr>`).join('');
+}
+
+/* ── DOWNLOAD: simulate PDF export ── */
+function downloadSavingsReport() {
+  alert(
+    'Cost Savings Report — Q2 2026\n\n' +
+    'Retreading vs new tyre:     RMB 1,670,280\n' +
+    'Downtime avoided:           RMB   880,400\n' +
+    'Fuel efficiency gain:       RMB   184,836\n' +
+    'CCER credits earned:        RMB   147,760\n' +
+    'ESG compliance avoided:     RMB    60,000\n' +
+    '─────────────────────────────────────────\n' +
+    'GROSS SAVING Q2:            RMB 2,943,276\n' +
+    'CFI fee Q2 (RMB 217/veh/mo):RMB   701,316\n' +
+    'NET SAVING Q2:              RMB 2,241,960\n' +
+    'Return on CFI fee:          4.2×\n' +
+    'Annualised net saving:      RMB 8.97M/yr\n\n' +
+    'Blockchain reference: Carbon Ledger Block #24,841\n' +
+    'Report generated by CFI — prototype simulation'
+  );
+}
+document.addEventListener('DOMContentLoaded', function () {
+  renderOverviewVehicles();
+  renderFullVehicles();
+  renderLedger();
+  renderRetread();
+  renderCcer();
+  renderSavingsStreams();
+  renderTopSavings();
+});
+</script>
+
+</body>
+</html>
