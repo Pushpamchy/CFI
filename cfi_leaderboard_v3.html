@@ -679,6 +679,7 @@
 
   <div class="topbar-title">
     Michelin ESG Star — China Commercial Logistics Leaderboard
+    <div style="font-size:10px;opacity:0.72;margin-top:2px;letter-spacing:0.05em">Powered by the Michelin Guide ★★★</div>
   </div>
 
   <div class="topbar-right">
@@ -731,13 +732,13 @@
   <span class="filter-label">Filter:</span>
 
   <button class="tier-btn all-t active" onclick="filterTier('all',this)">
-    All Tiers <span class="tier-count">312 fleets</span>
+    All Tiers ▾ <span class="tier-count">312 fleets</span>
   </button>
   <button class="tier-btn green-t" onclick="filterTier('green',this)">
-    ★★★ Green <span class="tier-count">28 · ≤35 gCO₂</span>
+    ★★★ Green ▾ <span class="tier-count">28 · ≤35 gCO₂</span>
   </button>
   <button class="tier-btn silver-t" onclick="filterTier('silver',this)">
-    ★★ Silver <span class="tier-count">97 · ≤42 gCO₂</span>
+    ★★ Silver ▾ <span class="tier-count">97 · ≤42 gCO₂</span>
   </button>
   <button class="tier-btn bronze-t" onclick="filterTier('bronze',this)">
     ★ Bronze <span class="tier-count">187 · ≤55 gCO₂</span>
@@ -840,6 +841,7 @@
             <th>Carbon Intensity</th>
             <th>ESG Score</th>
             <th>CO₂ Avoided</th>
+            <th>Jobs Created</th>
             <th>CCER Credits</th>
           </tr>
         </thead>
@@ -855,10 +857,11 @@
     <div class="panel-card">
       <div class="panel-card-hd">Scoring Methodology</div>
       <div class="panel-body">
-        <div class="meth-row"><div class="meth-num">01</div><div class="meth-text">Carbon intensity per vehicle-km (sensor-verified, not estimated)</div><div class="meth-pct">35%</div></div>
-        <div class="meth-row"><div class="meth-num">02</div><div class="meth-text">Tyre lifecycle management and retreading rate</div><div class="meth-pct">25%</div></div>
-        <div class="meth-row"><div class="meth-num">03</div><div class="meth-text">Route optimisation and fuel efficiency improvement</div><div class="meth-pct">20%</div></div>
-        <div class="meth-row"><div class="meth-num">04</div><div class="meth-text">CCER credit generation and waste diversion</div><div class="meth-pct">20%</div></div>
+        <div class="meth-row"><div class="meth-num">01</div><div class="meth-text">Carbon intensity per vehicle-km (sensor-verified, not estimated)</div><div class="meth-pct">30%</div></div>
+        <div class="meth-row"><div class="meth-num">02</div><div class="meth-text">Tyre lifecycle management and retreading rate</div><div class="meth-pct">20%</div></div>
+        <div class="meth-row"><div class="meth-num">03</div><div class="meth-text">Route optimisation and fuel efficiency improvement</div><div class="meth-pct">15%</div></div>
+        <div class="meth-row"><div class="meth-num">04</div><div class="meth-text">CCER credit generation and waste diversion</div><div class="meth-pct">15%</div></div>
+        <div class="meth-row"><div class="meth-num">05</div><div class="meth-text">Workforce impact — direct jobs created &amp; YoY employment growth</div><div class="meth-pct">20%</div></div>
         <div class="codeved-box">
           <div class="codeved-label">Co-developed with</div>
           <div class="codeved-text">GRI International Standards · MIIT China · Annual independent audit</div>
@@ -929,19 +932,19 @@ function toggleTheme() {
    FLEET DATA — hard-coded. Production → CFI scoring API.
 ════════════════════════════════════════════════════════════ */
 const FLEETS = [
-  { id:'polarstar',  rank:1,    prev:1,    name:'PolarStar Cold Chain Group',       type:'Cold chain / pharma · 890 veh',        tier:'green',    co2:31.2, score:98.7, avoided:'4,820t', ccer:'RMB 1.9M', highlight:false },
-  { id:'eastern',    rank:2,    prev:4,    name:'Eastern Freight Alliance',          type:'Long-haul · 2,140 veh',                tier:'silver',   co2:38.4, score:96.2, avoided:'3,210t', ccer:'RMB 1.2M', highlight:false },
-  { id:'blueline',   rank:3,    prev:3,    name:'BlueLine Express Freight',          type:'Long-haul · 3,420 veh',                tier:'silver',   co2:39.1, score:95.4, avoided:'5,140t', ccer:'RMB 2.0M', highlight:false },
-  { id:'meridian',   rank:4,    prev:2,    name:'Meridian Bulk Transport',           type:'Long-haul · 5,200 veh',                tier:'green',    co2:33.8, score:94.1, avoided:'6,820t', ccer:'RMB 2.6M', highlight:false },
-  { id:'crystal',    rank:5,    prev:5,    name:'CrystalPath Pharma Logistics',      type:'Cold chain / pharma · 420 veh',        tier:'green',    co2:34.2, score:93.8, avoided:'1,240t', ccer:'RMB 480K', highlight:false },
-  { id:'greenroute', rank:6,    prev:7,    name:'GreenRoute Intercity',              type:'Long-haul · 1,870 veh',                tier:'silver',   co2:40.1, score:88.4, avoided:'2,910t', ccer:'RMB 1.1M', highlight:false },
-  { id:'ironbridge', rank:7,    prev:3,    name:'IronBridge Heavy Logistics',        type:'Long-haul · 4,100 veh',                tier:'silver',   co2:41.3, score:87.2, avoided:'4,380t', ccer:'RMB 1.7M', highlight:false },
-  { id:'voltfleet',  rank:8,    prev:9,    name:'VoltFleet EV Freight',              type:'EV commercial fleet · 680 veh',        tier:'silver',   co2:41.9, score:86.7, avoided:'1,120t', ccer:'RMB 430K', highlight:false },
-  { id:'northstar',  rank:9,    prev:15,   name:'NorthStar Logistics Group',         type:'Long-haul · 847 veh · Your Fleet',     tier:'bronze',   co2:48.2, score:79.4, avoided:'1,847t', ccer:'RMB 143K', highlight:true  },
-  { id:'swiftcargo', rank:10,   prev:10,   name:'SwiftCargo Northern',               type:'Long-haul · 2,300 veh',                tier:'bronze',   co2:49.4, score:78.1, avoided:'3,210t', ccer:'RMB 248K', highlight:false },
-  { id:'horizon',    rank:11,   prev:9,    name:'Horizon Distribution Co.',          type:'Long-haul · 1,640 veh',                tier:'bronze',   co2:51.2, score:74.3, avoided:'2,140t', ccer:'RMB 165K', highlight:false },
-  { id:'silkroad',   rank:12,   prev:15,   name:'SilkRoad Inland Freight',           type:'Long-haul · 3,800 veh',                tier:'bronze',   co2:52.7, score:72.8, avoided:'4,100t', ccer:'RMB 317K', highlight:false },
-  { id:'century',    rank:null, prev:null, name:'CenturyCargo Group',                type:'Long-haul · 6,200 veh · Not certified',tier:'progress', co2:61.4, score:null, avoided:'—',       ccer:'—',         highlight:false },
+  { id:'polarstar',  rank:1,    prev:1,    name:'PolarStar Cold Chain Group',       type:'Cold chain / pharma · 890 veh',        tier:'green',    co2:31.2, score:98.7, avoided:'4,820t', ccer:'RMB 1.9M', highlight:false , jobs:'2,847 · +12% YoY' },
+  { id:'eastern',    rank:2,    prev:4,    name:'Eastern Freight Alliance',          type:'Long-haul · 2,140 veh',                tier:'silver',   co2:38.4, score:96.2, avoided:'3,210t', ccer:'RMB 1.2M', highlight:false , jobs:'6,420 · +8% YoY' },
+  { id:'blueline',   rank:3,    prev:3,    name:'BlueLine Express Freight',          type:'Long-haul · 3,420 veh',                tier:'silver',   co2:39.1, score:95.4, avoided:'5,140t', ccer:'RMB 2.0M', highlight:false , jobs:'10,260 · +6% YoY' },
+  { id:'meridian',   rank:4,    prev:2,    name:'Meridian Bulk Transport',           type:'Long-haul · 5,200 veh',                tier:'green',    co2:33.8, score:94.1, avoided:'6,820t', ccer:'RMB 2.6M', highlight:false , jobs:'15,600 · +4% YoY' },
+  { id:'crystal',    rank:5,    prev:5,    name:'CrystalPath Pharma Logistics',      type:'Cold chain / pharma · 420 veh',        tier:'green',    co2:34.2, score:93.8, avoided:'1,240t', ccer:'RMB 480K', highlight:false , jobs:'1,260 · +18% YoY' },
+  { id:'greenroute', rank:6,    prev:7,    name:'GreenRoute Intercity',              type:'Long-haul · 1,870 veh',                tier:'silver',   co2:40.1, score:88.4, avoided:'2,910t', ccer:'RMB 1.1M', highlight:false , jobs:'5,610 · +11% YoY' },
+  { id:'ironbridge', rank:7,    prev:3,    name:'IronBridge Heavy Logistics',        type:'Long-haul · 4,100 veh',                tier:'silver',   co2:41.3, score:87.2, avoided:'4,380t', ccer:'RMB 1.7M', highlight:false , jobs:'12,300 · +3% YoY' },
+  { id:'voltfleet',  rank:8,    prev:9,    name:'VoltFleet EV Freight',              type:'EV commercial fleet · 680 veh',        tier:'silver',   co2:41.9, score:86.7, avoided:'1,120t', ccer:'RMB 430K', highlight:false , jobs:'2,040 · +22% YoY' },
+  { id:'northstar',  rank:9,    prev:15,   name:'NorthStar Logistics Group',         type:'Long-haul · 847 veh · Your Fleet',     tier:'bronze',   co2:48.2, score:79.4, avoided:'1,847t', ccer:'RMB 143K', highlight:true  , jobs:'2,541 · +9% YoY' },
+  { id:'swiftcargo', rank:10,   prev:10,   name:'SwiftCargo Northern',               type:'Long-haul · 2,300 veh',                tier:'bronze',   co2:49.4, score:78.1, avoided:'3,210t', ccer:'RMB 248K', highlight:false , jobs:'6,900 · +5% YoY' },
+  { id:'horizon',    rank:11,   prev:9,    name:'Horizon Distribution Co.',          type:'Long-haul · 1,640 veh',                tier:'bronze',   co2:51.2, score:74.3, avoided:'2,140t', ccer:'RMB 165K', highlight:false , jobs:'4,920 · +7% YoY' },
+  { id:'silkroad',   rank:12,   prev:15,   name:'SilkRoad Inland Freight',           type:'Long-haul · 3,800 veh',                tier:'bronze',   co2:52.7, score:72.8, avoided:'4,100t', ccer:'RMB 317K', highlight:false , jobs:'11,400 · +6% YoY' },
+  { id:'century',    rank:null, prev:null, name:'CenturyCargo Group',                type:'Long-haul · 6,200 veh · Not certified',tier:'progress', co2:61.4, score:null, avoided:'—',       ccer:'—',         highlight:false , jobs:'18,600 · —' },
 ];
 
 /* ════════════════════════════════════════════════════════════
@@ -1002,7 +1005,7 @@ function renderTable(tier) {
   label.textContent = `Showing ${certified} certified fleet${certified !== 1 ? 's' : ''}`;
 
   if (rows.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state">No fleets match this filter.</div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state">No fleets match this filter.</div></td></tr>`;
     return;
   }
 
@@ -1065,6 +1068,7 @@ function buildRow(f) {
       <td><span class="td-num" style="${co2Style}">${f.co2} g</span></td>
       <td>${scoreHtml}</td>
       <td class="td-num">${f.avoided}</td>
+      <td class="td-num" style="font-size:10px">${f.jobs || '—'}</td>
       <td class="td-num" style="${f.highlight ? 'color:var(--michelin-red)' : ''}">${f.ccer}</td>
     </tr>`;
 }
