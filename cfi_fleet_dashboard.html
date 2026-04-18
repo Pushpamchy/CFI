@@ -682,6 +682,93 @@
     .col-ok     { color: var(--ok); }
     .col-gold   { color: var(--gold); }
     .col-blue   { color: var(--blue); }
+
+    /* ── FAQ MODAL ─────────────────────────────────────────── */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0; z-index: 1000;
+      background: rgba(0,0,0,0.60); backdrop-filter: blur(4px);
+    }
+    .modal-overlay.open { display: flex; align-items: flex-start; justify-content: center; padding-top: 60px; }
+    .modal-box {
+      background: var(--surface-1); border: 1px solid var(--border-2);
+      border-radius: 12px; width: 90%; max-width: 640px;
+      max-height: 80vh; overflow: hidden; display: flex; flex-direction: column;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    }
+    .modal-header {
+      background: var(--red); padding: 14px 20px;
+      display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+    }
+    .modal-header-title { font-size: 14px; font-weight: 600; color: #fff; }
+    .modal-close {
+      background: none; border: none; color: #fff; font-size: 20px;
+      cursor: pointer; line-height: 1; padding: 0 4px; opacity: 0.8;
+    }
+    .modal-close:hover { opacity: 1; }
+    .modal-body { overflow-y: auto; padding: 20px; }
+    /* FAQ accordion items */
+    .faq-item { border-bottom: 1px solid var(--border); }
+    .faq-q {
+      width: 100%; text-align: left; background: none; border: none;
+      padding: 13px 0; cursor: pointer; display: flex; justify-content: space-between;
+      align-items: center; gap: 12px; color: var(--text-primary);
+      font-size: 12px; font-weight: 600; font-family: 'DM Sans', sans-serif;
+    }
+    .faq-q:hover { color: var(--red); }
+    .faq-chevron { font-size: 10px; color: var(--text-dim); transition: transform .2s; flex-shrink: 0; }
+    .faq-q.open .faq-chevron { transform: rotate(180deg); color: var(--red); }
+    .faq-a {
+      display: none; padding: 0 0 13px; font-size: 11.5px;
+      color: var(--text-secondary); line-height: 1.7;
+    }
+    .faq-a.open { display: block; }
+    /* Support slide-in panel */
+    .support-panel {
+      position: fixed; right: -400px; top: 0; bottom: 0; width: 360px; z-index: 900;
+      background: var(--surface-1); border-left: 1px solid var(--border-2);
+      display: flex; flex-direction: column;
+      box-shadow: -8px 0 30px rgba(0,0,0,0.4);
+      transition: right 0.3s cubic-bezier(0.4,0,0.2,1);
+    }
+    .support-panel.open { right: 0; }
+    .support-panel-hd {
+      background: var(--red); padding: 14px 16px;
+      display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+    }
+    .support-panel-title { font-size: 13px; font-weight: 600; color: #fff; }
+    .support-panel-body { flex: 1; overflow-y: auto; padding: 16px; }
+    .support-status {
+      background: var(--ok-dim); border: 1px solid rgba(34,197,94,0.25);
+      border-radius: 6px; padding: 10px 12px; margin-bottom: 14px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .support-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--ok); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+    .support-option {
+      border: 1px solid var(--border-2); border-radius: 8px; padding: 12px;
+      margin-bottom: 10px; cursor: pointer; transition: border-color .15s;
+    }
+    .support-option:hover { border-color: var(--red); }
+    .support-option-title { font-size: 12px; font-weight: 600; color: var(--text-primary); margin-bottom: 3px; }
+    .support-option-sub { font-size: 10.5px; color: var(--text-secondary); }
+    .support-option-badge { font-size: 9px; padding: 1px 7px; border-radius: 3px; margin-left: 6px; }
+    .chat-box { border: 1px solid var(--border-2); border-radius: 8px; overflow: hidden; margin-top: 14px; }
+    .chat-messages { height: 180px; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+    .chat-msg { max-width: 85%; padding: 7px 11px; border-radius: 10px; font-size: 11px; line-height: 1.5; }
+    .chat-msg.bot { background: var(--surface-3); color: var(--text-primary); align-self: flex-start; border-radius: 2px 10px 10px 10px; }
+    .chat-msg.user { background: var(--red-dim); border: 1px solid var(--red-border); color: var(--text-primary); align-self: flex-end; border-radius: 10px 2px 10px 10px; }
+    .chat-input-row { display: flex; border-top: 1px solid var(--border); }
+    .chat-input {
+      flex: 1; background: none; border: none; padding: 9px 12px;
+      color: var(--text-primary); font-size: 11.5px; font-family: 'DM Sans', sans-serif;
+      outline: none;
+    }
+    .chat-send {
+      background: var(--red); border: none; color: #fff; padding: 0 14px;
+      cursor: pointer; font-size: 13px; transition: background .15s;
+    }
+    .chat-send:hover { background: #a50f25; }
+
   </style>
 </head>
 
@@ -719,6 +806,8 @@
     <span class="tier-chip">★ ESG BRONZE</span>
     <!-- Dark / Light theme toggle -->
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn">☀️ Light Mode</button>
+    <button class="theme-btn" onclick="openFAQ()" style="background:rgba(255,255,255,0.12);margin-left:4px" title="FAQ & Help">❓ FAQ</button>
+    <button class="theme-btn" onclick="openSupport()" style="background:rgba(34,197,94,0.18);border-color:rgba(34,197,94,0.4);margin-left:4px" title="Customer Service">💬 Support</button>
   </div>
 
 </header>
@@ -2575,7 +2664,182 @@ document.addEventListener('DOMContentLoaded', function () {
   renderSavingsStreams();
   renderTopSavings();
 });
+
+/* ── FAQ DATA ──────────────────────────────────────────────── */
+const FAQS = [
+  {
+    q: "What does the Carbon Intensity score mean?",
+    a: "Carbon Intensity is grams of CO\u2082 per vehicle-kilometre (gCO\u2082/vkm). Your fleet average is 48.2 gCO\u2082/vkm vs the China HDL industry average of 61 gCO\u2082/vkm \u2014 you are already 21% below average. To reach ESG Bronze (\u226452 gCO\u2082/vkm) you need to reduce by just 3.8 gCO\u2082/vkm, achievable through 3\u20134 more retreading cycles."
+  },
+  {
+    q: "Why is my CCER credit balance showing \xA50?",
+    a: "CCER credits require MEE (Ministry of Ecology) approval of the CFI logistics fleet carbon methodology. This is submitted and expected Q3\u2013Q4 2026. Your fleet has already avoided 1,847 tonnes of CO\u2082 this quarter \u2014 all recorded in the blockchain Carbon Ledger and will be credited retroactively on MEE approval."
+  },
+  {
+    q: "Vehicle HVL-9912 shows Sensor Alert for 3 days. What do I do?",
+    a: "A Sensor Alert means the Smart Predictive Tyre sensor has not transmitted a valid reading for 24+ hours. Usually a loose OBD connection or hardware fault (10\u201312% annual failure rate, expected). Go to Fleet Monitor \u2192 HVL-9912 \u2192 Schedule Inspection. A CFI technician visits within 48 hours. The data gap is handled using conservative baseline substitution so your CCER calculations are unaffected."
+  },
+  {
+    q: "How does retreading save money?",
+    a: "A new HDL tyre costs RMB\u00a03,850. A Michelin retreaded tyre costs RMB\u00a02,503 \u2014 saving RMB\u00a01,347 (35%) with the same warranty. Your 847 vehicles each use 6 tyres retreaded 1.5 times/year = 9 retreading events/vehicle/year = RMB\u00a012,123 tyre savings annually. HVL-9912 alone saved RMB\u00a034,122 last quarter. CFI subscription costs RMB\u00a02,600/vehicle/year. The retreading saving is 4.7\xd7 the subscription cost."
+  },
+  {
+    q: "What is the ESG Star and how does it help our CSRC disclosure?",
+    a: "The Michelin ESG Star is a three-tier accreditation: \u2605 Bronze (\u226452 gCO\u2082/vkm), \u2605\u2605 Silver (\u226442 gCO\u2082/vkm), \u2605\u2605\u2605 Green (\u226435 gCO\u2082/vkm). Dual-verified by Bureau Veritas (carbon credits) and SGS (data integrity). For 2026 CSRC mandatory ESG disclosure, CFI auto-generates a GRI 305/306-aligned report every quarter from your Carbon Ledger. Your ESG Director downloads the CSRC-ready PDF from the ESG Reports tab."
+  },
+  {
+    q: "Is our fleet data safe under Chinese data law?",
+    a: "Yes. All data is stored on Alibaba Cloud CN-East. Zero cross-border transfer. Fully compliant with PIPL, CSL, and DSL. The Carbon Ledger is SHA-256 hashed and blockchain-immutable \u2014 not even Michelin can alter it. This protects your verified ESG compliance record permanently."
+  },
+  {
+    q: "When will we reach Silver Star?",
+    a: "At 48.2 gCO\u2082/vkm you need to close 6.2 gCO\u2082 to reach Silver (\u226442). CFI projects Silver by September 2026 if: (1) the 3 vehicles flagged in Fleet Monitor complete overdue retreading this week, and (2) route optimisation is applied to HVL-4821 and HVL-7743. Silver Star holders qualify for Ping An/PICC insurance premium reductions and the Shanghai ETS carbon credit bonus tier."
+  },
+  {
+    q: "How do I download the GRI report for our annual ESG filing?",
+    a: "Go to ESG Reports tab \u2192 Download GRI 305 Report or GRI 306 Report. Reports are auto-generated from your Carbon Ledger and CSRC-ready with all mandatory fields pre-filled (Scope 1, Scope 3 Category 11, carbon intensity per vkm, tyre waste diversion). Each report carries a blockchain verification reference (Carbon Ledger block number) that any auditor can independently verify."
+  },
+];
+
+function openFAQ() {
+  const body = document.getElementById('faqBody');
+  body.innerHTML = FAQS.map((item, i) => `
+    <div class="faq-item">
+      <button class="faq-q" onclick="toggleFAQ(${i},this)">
+        <span>${item.q}</span>
+        <span class="faq-chevron">\u25bc</span>
+      </button>
+      <div class="faq-a" id="faq-a-${i}">${item.a}</div>
+    </div>`).join('');
+  document.getElementById('faqModal').classList.add('open');
+}
+function closeFAQ() {
+  document.getElementById('faqModal').classList.remove('open');
+}
+function toggleFAQ(i, btn) {
+  const ans = document.getElementById('faq-a-' + i);
+  const isOpen = ans.classList.contains('open');
+  document.querySelectorAll('.faq-a').forEach(a => a.classList.remove('open'));
+  document.querySelectorAll('.faq-q').forEach(b => b.classList.remove('open'));
+  if (!isOpen) { ans.classList.add('open'); btn.classList.add('open'); }
+}
+function openSupport() {
+  document.getElementById('supportPanel').classList.add('open');
+}
+function closeSupport() {
+  document.getElementById('supportPanel').classList.remove('open');
+}
+const CHAT_RESPONSES = {
+  'sensor': "For sensor alerts, go to Fleet Monitor and select the flagged vehicle. I can schedule an inspection within 48 hours. Sensor failure rate of 10-12% annually is expected and factored into your CCER calculations.",
+  'retread': "Your next retreading events are shown in the Retreading tab. HVL-0047 and HVL-0112 are both at 90%+ wear and should be scheduled this week. Each retreading saves approximately RMB 1,347 vs buying a new tyre.",
+  'ccer': "CCER credits require MEE methodology approval, expected Q3-Q4 2026. Your fleet has already avoided 1,847 tonnes of CO\u2082 this quarter \u2014 all recorded in the Carbon Ledger and will be credited retroactively.",
+  'esg': "Your ESG Bronze Star is at 48.2 gCO\u2082/vkm. You need to reduce 6.2 gCO\u2082 to reach Silver. CFI projects Silver achievement by September 2026 with the retreading completions already scheduled.",
+  'csrc': "Your CSRC disclosure package is auto-generated every quarter from the Carbon Ledger. Go to ESG Reports \u2192 Download CSRC Package. All mandatory fields are pre-filled including GRI 305/306 data.",
+  'default': "Thanks for your question. I've logged this for your account manager Zhang Wei who will follow up within 2 hours. For urgent issues, call +86 400 810 1915."
+};
+function sendChat() {
+  const input = document.getElementById('chatInput');
+  const msgs = document.getElementById('chatMessages');
+  const text = input.value.trim();
+  if (!text) return;
+  const userDiv = document.createElement('div');
+  userDiv.className = 'chat-msg user';
+  userDiv.textContent = text;
+  msgs.appendChild(userDiv);
+  input.value = '';
+  const lower = text.toLowerCase();
+  let response = CHAT_RESPONSES.default;
+  for (const [key, val] of Object.entries(CHAT_RESPONSES)) {
+    if (lower.includes(key)) { response = val; break; }
+  }
+  setTimeout(() => {
+    const botDiv = document.createElement('div');
+    botDiv.className = 'chat-msg bot';
+    botDiv.textContent = response;
+    msgs.appendChild(botDiv);
+    msgs.scrollTop = msgs.scrollHeight;
+  }, 600);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
 </script>
+
+
+<!-- ════════════════════════════════════════════════════════════
+     FAQ MODAL
+════════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="faqModal" onclick="if(event.target===this)closeFAQ()">
+  <div class="modal-box">
+    <div class="modal-header">
+      <span class="modal-header-title">❓ Frequently Asked Questions — CFI Fleet Dashboard</span>
+      <button class="modal-close" onclick="closeFAQ()">×</button>
+    </div>
+    <div class="modal-body" id="faqBody"></div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════
+     CUSTOMER SUPPORT PANEL
+════════════════════════════════════════════════════════════ -->
+<div class="support-panel" id="supportPanel">
+  <div class="support-panel-hd">
+    <span class="support-panel-title">💬 CFI Customer Support</span>
+    <button class="modal-close" onclick="closeSupport()">×</button>
+  </div>
+  <div class="support-panel-body">
+    <div class="support-status">
+      <div class="support-dot"></div>
+      <span style="font-size:11px;color:var(--ok);font-weight:600">Support team online · Avg response 4 min</span>
+    </div>
+
+    <div style="font-size:10px;font-weight:600;letter-spacing:.8px;color:var(--text-dim);margin-bottom:8px;text-transform:uppercase">Contact Options</div>
+
+    <div class="support-option" onclick="alert('Live chat initiated — connecting to CFI support agent...')">
+      <div class="support-option-title">💬 Live Chat
+        <span class="support-option-badge" style="background:var(--ok-dim);color:var(--ok);border:1px solid rgba(34,197,94,0.3)">ONLINE</span>
+      </div>
+      <div class="support-option-sub">Chat with a CFI support agent in real time. Available 08:00–22:00 CST.</div>
+    </div>
+
+    <div class="support-option" onclick="alert('Opening WeChat: CFI-Support-Official')">
+      <div class="support-option-title">📱 WeChat Support
+        <span class="support-option-badge" style="background:rgba(7,193,96,0.12);color:#07C160;border:1px solid rgba(7,193,96,0.3)">WeChat</span>
+      </div>
+      <div class="support-option-sub">Scan QR or search: CFI-Support-Official. Fastest channel for urgent issues.</div>
+    </div>
+
+    <div class="support-option" onclick="alert('Email: fleet-support@cfi.michelin.com
+Include your Fleet ID and vehicle count in the subject line.')">
+      <div class="support-option-title">✉️ Email Support</div>
+      <div class="support-option-sub">fleet-support@cfi.michelin.com · Response within 2 business hours.</div>
+    </div>
+
+    <div class="support-option" onclick="alert('Hotline: +86 400 810 1915
+Available 24/7 for sensor hardware emergencies.')">
+      <div class="support-option-title">📞 Hotline <span class="support-option-badge" style="background:var(--red-dim);color:var(--red);border:1px solid var(--red-border)">24/7</span></div>
+      <div class="support-option-sub">+86 400 810 1915 · Sensor hardware, data outages, urgent issues only.</div>
+    </div>
+
+    <div style="font-size:10px;font-weight:600;letter-spacing:.8px;color:var(--text-dim);margin:14px 0 8px;text-transform:uppercase">Chat with CFI Assistant</div>
+    <div class="chat-box">
+      <div class="chat-messages" id="chatMessages">
+        <div class="chat-msg bot">Hello! I'm the CFI support assistant. How can I help you today?</div>
+        <div class="chat-msg bot">You can ask me about sensor alerts, retreading schedules, CCER credits, or your ESG Star status.</div>
+      </div>
+      <div class="chat-input-row">
+        <input class="chat-input" id="chatInput" placeholder="Type your question..." onkeydown="if(event.key==='Enter')sendChat()"/>
+        <button class="chat-send" onclick="sendChat()">➤</button>
+      </div>
+    </div>
+
+    <div style="margin-top:14px;padding:10px;background:var(--surface-2);border-radius:6px;font-size:10.5px;color:var(--text-secondary);line-height:1.6">
+      <strong style="color:var(--text-primary)">Your Account Manager:</strong><br>
+      Zhang Wei · CFI Enterprise Success<br>
+      zhang.wei@cfi.michelin.com · +86 138 0013 8000<br>
+      <span style="color:var(--text-dim);font-size:10px">Fleet ID: NSL-0847 · Contract: Enterprise · Renewal: Mar 2027</span>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>
